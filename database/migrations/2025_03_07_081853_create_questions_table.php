@@ -13,13 +13,22 @@ return new class extends Migration
     {
         Schema::create('questions', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('subject_id')->constrained('subjects')->onDelete('cascade');
-            $table->foreignId('question_type_id')->constrained('question_types')->onDelete('cascade');
-            $table->text('question_text');
-            $table->text('correct_answer')->nullable(); // For various question types
+            $table->foreignId('subject_id')->constrained('subjects')->onDeleteCascade();
+            $table->foreignId('question_type_id')->constrained('question_types')->onDeleteCascade();
+            $table->integer('max_time_allowed')->unsigned()->nullable();
+            $table->tinyinteger('negative_marks')->unsigned()->default(0); 
+            $table->text('text');
+            $table->text('description')->nullable();
+            $table->text('explanation')->nullable();
+            $table->text('image')->nullable();
             $table->integer('marks')->default(1);
+            $table->enum('difficulty_level', ['easy', 'medium', 'hard'])->default('medium'); 
+            $table->enum('status', ['active', 'inactive'])->default('active');
             $table->timestamps();
             $table->softDeletes();
+            
+            // Add index on commonly filtered columns
+            $table->index(['subject_id', 'question_type_id', 'difficulty_level']);
         });
     }
 

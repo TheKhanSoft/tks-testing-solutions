@@ -2,28 +2,48 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use App\Models\User;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
+        // Create admin user
         User::create([
-            'name' => 'John Doe',
-            'email' => 'john.doe@example.com',
-            'password' => bcrypt('password123'),
+            'name' => 'Admin User',
+            'email' => 'admin@example.com',
+            'email_verified_at' => now(),
+            'password' => Hash::make('password'),
         ]);
 
-        User::create([
-            'name' => 'Jane Smith',
-            'email' => 'jane.smith@example.com',
-            'password' => bcrypt('password456'),
-        ]);
+        // Create regular staff users
+        $users = [
+            [
+                'name' => 'Muhammad Ahsan',
+                'email' => 'ahsan@example.com', 
+                'password' => Hash::make('password'),
+            ],
+            [
+                'name' => 'Ayesha Khan',
+                'email' => 'ayesha@example.com',
+                'password' => Hash::make('password'),
+            ],
+            [
+                'name' => 'Farhan Ahmed',
+                'email' => 'farhan@example.com',
+                'password' => Hash::make('password'),
+            ],
+            [
+                'name' => 'Zainab Ali',
+                'email' => 'zainab@example.com',
+                'password' => Hash::make('password'),
+            ],
+        ];
 
-        // Add more realistic user data here
+        foreach ($users as $userData) {
+            User::create($userData + ['email_verified_at' => now()]);
+        }
     }
 }

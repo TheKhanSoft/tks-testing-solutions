@@ -2,23 +2,38 @@
 
 namespace Database\Seeders;
 
+use App\Models\PaperCategory;
 use Illuminate\Database\Seeder;
-use App\Models\Paper;
-use App\Models\Category;
 
 class PaperCategorySeeder extends Seeder
 {
-    /**
-     * Run the database seeds.
-     */
     public function run(): void
     {
-        $papers = Paper::all();
-        $categories = Category::all();
+        $categories = [
+            [
+                'name' => 'GAT General',
+                'description' => 'Graduate Assessment Test for general subjects',
+            ],
+            [
+                'name' => 'GAT Subject',
+                'description' => 'Graduate Assessment Test for specific subjects',
+            ],
+            [
+                'name' => 'Entry Test',
+                'description' => 'University admission entry test',
+            ],
+            [
+                'name' => 'Midterm Exam',
+                'description' => 'Mid-semester examination',
+            ],
+            [
+                'name' => 'Final Exam',
+                'description' => 'End-of-semester examination',
+            ],
+        ];
 
-        // Assign categories to papers
-        foreach ($papers as $paper) {
-            $paper->categories()->attach($categories->random(rand(1, 2))->pluck('id')->toArray());
+        foreach ($categories as $category) {
+            PaperCategory::create($category);
         }
     }
 }

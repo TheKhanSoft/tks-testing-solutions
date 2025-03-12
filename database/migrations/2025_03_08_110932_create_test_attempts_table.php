@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('test_attempts', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            $table->foreignId('paper_id')->constrained('papers')->onDelete('cascade');
+            $table->foreignId('candiate_id')->constrained()->onDeleteCascade();
+            $table->foreignId('paper_id')->constrained()->onDeleteCascade();
             $table->timestamp('start_time')->nullable();
             $table->timestamp('end_time')->nullable();
             $table->integer('score')->nullable();

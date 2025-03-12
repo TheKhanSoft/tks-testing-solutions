@@ -13,11 +13,41 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        // Main application seeders
+        $this->call([
+            UserSeeder::class,
+            RoleSeeder::class,
+            PermissionsSeeder::class,
+            
+            // Department and subjects
+            DepartmentSeeder::class,
+            SubjectSeeder::class,
+            DepartmentSubjectSeeder::class,
+            
+            // Faculty members and subject assignments
+            FacultyMemberSeeder::class,
+            FacultySubjectSeeder::class,
+            
+            // Question types and questions
+            QuestionTypeSeeder::class,
+            QuestionSeeder::class,
+            QuestionOptionSeeder::class,
+            
+            // // Question tagging system
+            // TagSeeder::class,
+            // QuestionTagSeeder::class,
+            
+            // Papers and categories
+            PaperCategorySeeder::class,
+            PaperSubjectSeeder::class,
+            PaperSeeder::class,
+            PaperQuestionSeeder::class,
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+            // Candidate and Paper
+            CandidateSeeder::class,
+            TestAttemptSeeder::class,
+            CandidatePaperSeeder::class,
+    
         ]);
     }
 }

@@ -18,6 +18,9 @@ return new class extends Migration
             $table->integer('order_index')->nullable(); // To store shuffled order
             $table->timestamps();
             $table->softDeletes();
+            
+            // Add unique constraint to prevent duplicate questions in a paper
+            $table->unique(['paper_id', 'question_id']);
         });
     }
 

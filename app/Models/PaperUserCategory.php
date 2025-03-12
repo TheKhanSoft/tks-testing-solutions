@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class FacultytSubject extends Model
+class PaperUserCategory extends Model
 {
     //
 }
