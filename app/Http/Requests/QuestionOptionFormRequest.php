@@ -11,7 +11,7 @@ class QuestionOptionFormRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true; // Adjust authorization logic as needed
+        return true;
     }
 
     /**
@@ -23,8 +23,10 @@ class QuestionOptionFormRequest extends FormRequest
     {
         return [
             'question_id' => 'required|exists:questions,id',
-            'option_text' => 'required|string',
-            'is_correct' => 'sometimes|boolean', // Optional, defaults to false if not provided
+            'option_text' => 'required|string|max:1000',
+            'is_correct' => 'sometimes|boolean',
+            'order' => 'nullable|integer|min:0',
+            'explanation' => 'nullable|string|max:1000',
         ];
     }
 
@@ -37,9 +39,14 @@ class QuestionOptionFormRequest extends FormRequest
     {
         return [
             'question_id.required' => 'Question ID is required! Which question does this option belong to? ❓',
-            'question_id.exists' => 'Invalid question ID.  Make sure it\'s a real question! 🧐',
-            'option_text.required' => 'Option text is needed! What is this option saying?  💬',
+            'question_id.exists' => 'Invalid question ID. Make sure it\'s a real question! 🧐',
+            'option_text.required' => 'Option text is needed! What is this option saying? 💬',
+            'option_text.max' => 'Option text is too long. 1000 characters is the maximum! 📝',
             'is_correct.boolean' => 'Correct option must be true or false. Is it the right one? ✅ or ❌?',
+            'order.integer' => 'Order must be a number. Where should this option appear in the list? 🔢',
+            'order.min' => 'Order cannot be negative. Let\'s start from 0 or higher! 📊',
+            'explanation.string' => 'Explanation should be text. Why is this answer right or wrong? 🤔',
+            'explanation.max' => 'Explanation is too long. Keep it under 1000 characters! 📚',
         ];
     }
 }

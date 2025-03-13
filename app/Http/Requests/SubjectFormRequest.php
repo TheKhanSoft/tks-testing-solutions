@@ -3,6 +3,7 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Str;
 
 class SubjectFormRequest extends FormRequest
 {
@@ -11,7 +12,19 @@ class SubjectFormRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true; // Adjust authorization logic as needed
+        return true;
+    }
+
+    /**
+     * Prepare the data for validation.
+     */
+    protected function prepareForValidation(): void
+    {
+        if ($this->name) {
+            $this->merge([
+                'name' => Str::title($this->name),
+            ]);
+        }
     }
 
     /**
@@ -21,10 +34,19 @@ class SubjectFormRequest extends FormRequest
      */
     public function rules(): array
     {
+        $subjectId = $this->route('subject') ? $this->route('subject')->id : $this->subject;
+        
         return [
-            'name' => 'required|string|max:255|unique:subjects,name,' . $this->subject, // Unique except for the current subject being updated
+            'name' => [
+                'required',
+                'string',
+                'max:255',
+                "unique:subjects,name,{$subjectId}"
+            ],
             'department_id' => 'required|exists:departments,id',
-            'description' => 'nullable|string',
+            'description' => 'nullable|string|max:1000',
+            'code' => 'nullable|string|max:20',
+            'credits' => 'nullable|integer|min:1|max:6',
         ];
     }
 
@@ -42,6 +64,11 @@ class SubjectFormRequest extends FormRequest
             'department_id.required' => 'Department is required! Which department does this subject belong to? 🏢',
             'department_id.exists' => 'Hmm, the selected department doesn\'t seem to exist. Let\'s double-check! 🧐',
             'description.string' => 'Subject description should be text. Paint a picture with words! 🖼️',
+            'description.max' => 'Description is getting quite lengthy. Keep it under 1000 characters! 📚',
+            'code.max' => 'Subject code should be short and sweet - max 20 characters! 📝',
+            'credits.integer' => 'Credits must be a whole number. How many credits is this subject worth? 🎓',
+            'credits.min' => 'Subject should be worth at least 1 credit. Even small subjects deserve credit! ⭐',
+            'credits.max' => 'Subject credits seem high. Most subjects are 6 credits or fewer! 📊',
         ];
     }
 }
