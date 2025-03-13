@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class PaperQuestion extends Model
+class PaperSubject extends Model
 {
     use HasFactory, SoftDeletes;
 
@@ -18,8 +18,10 @@ class PaperQuestion extends Model
      */
     protected $fillable = [
         'paper_id',
-        'question_id',
-        'order_index',
+        'subject_id',
+        'percentage',
+        'number_of_questions',
+        'difficulty_distribution',
     ];
 
     /**
@@ -28,11 +30,13 @@ class PaperQuestion extends Model
      * @var array<string, string>
      */
     protected $casts = [
-        'order_index' => 'integer',
+        'percentage' => 'integer',
+        'number_of_questions' => 'integer',
+        'difficulty_distribution' => 'json',
     ];
 
     /**
-     * Get the paper that this question belongs to
+     * Get the paper that this subject belongs to
      */
     public function paper(): BelongsTo
     {
@@ -40,18 +44,10 @@ class PaperQuestion extends Model
     }
 
     /**
-     * Get the question
+     * Get the subject
      */
-    public function question(): BelongsTo
+    public function subject(): BelongsTo
     {
-        return $this->belongsTo(Question::class);
-    }
-
-    /**
-     * Scope a query to order by the order index
-     */
-    public function scopeOrdered($query)
-    {
-        return $query->orderBy('order_index');
+        return $this->belongsTo(Subject::class);
     }
 }

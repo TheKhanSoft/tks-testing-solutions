@@ -4,10 +4,11 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable; // Use Laravel's built-in User model as base
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class FacultyMember extends Authenticatable // Extending Laravel's User for Faculty
 {
-    use HasFactory, Notifiable, SoftDeletes; // Use SoftDeletes and Notifiable traits
+    use HasFactory, SoftDeletes; //  Notifiable, Use SoftDeletes and Notifiable traits
 
     protected $fillable = ['name', 'email', 'password', 'department_id', 'profile_picture', 'designation']; // Added profile_picture, designation
     protected $hidden = [

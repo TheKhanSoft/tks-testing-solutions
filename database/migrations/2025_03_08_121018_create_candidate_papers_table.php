@@ -13,10 +13,10 @@ return new class extends Migration
     {
         Schema::create('candidate_papers', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('test_attempt_id')->constrained('test_attempts')->onDelete('cascade');
-            $table->foreignId('candiate_id')->constrained()->onDeleteCascade();
-            $table->foreignId('question_id')->constrained()->nullOnDelete();
-            $table->foreignId('paper_id')->constrained()->nullOnDelete();
+            $table->foreignId('test_attempt_id')->constrained('test_attempts')->onDeleteCascade();
+            // $table->foreignId('candidate_id')->constrained()->onDeleteCascade();
+            $table->foreignId('question_id')->constrained()->onDeleteCascade();
+            // $table->foreignId('paper_id')->constrained()->nullOnDelete();
             $table->text('candidate_answer')->nullable();
             $table->boolean('is_correct')->nullable();
             $table->integer('marks_obtained')->nullable();
@@ -30,7 +30,7 @@ return new class extends Migration
             $table->index(['is_correct', 'status']);
             
             // Add unique constraint to prevent duplicate question for the same paper to a candidate
-            $table->unique(['candiate_id', 'paper_id', 'question_id']);
+            $table->unique(['test_attempt_id', 'question_id']);
         });
     }
 
@@ -39,6 +39,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('paper_questions');
+        Schema::dropIfExists('candidate_papers');
     }
 };

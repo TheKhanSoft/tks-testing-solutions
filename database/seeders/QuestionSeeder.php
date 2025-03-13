@@ -776,1187 +776,1239 @@ class QuestionSeeder extends Seeder
                 'marks' => 3,
             ],
 
-    [
-        'subject_id' => 1,
-        'question_type_id' => 1,
-        'text' => 'Which keyword is used to define a class in Java?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 1,
-        'question_type_id' => 3,
-        'text' => 'Python uses static typing.',
-        'difficulty_level' => 'medium',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 1,
-        'question_type_id' => 4,
-        'text' => 'Explain polymorphism with an example.',
-        'difficulty_level' => 'medium',
-        'marks' => 2,
-    ],
-    [
-        'subject_id' => 1,
-        'question_type_id' => 6,
-        'text' => 'In Java, the ______ keyword is used to inherit a class.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 1,
-        'question_type_id' => 1,
-        'text' => 'What is the default value of a boolean variable in Java?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 1,
-        'question_type_id' => 1,
-        'text' => 'Which data structure uses LIFO principle?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 1,
-        'question_type_id' => 3,
-        'text' => 'Java supports multiple inheritance for classes.',
-        'difficulty_level' => 'medium',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 1,
-        'question_type_id' => 4,
-        'text' => 'What are access modifiers in Java? List them.',
-        'difficulty_level' => 'easy',
-        'marks' => 2,
-    ],
-    [
-        'subject_id' => 1,
-        'question_type_id' => 1,
-        'text' => 'Which loop is guaranteed to execute at least once in Java?',
-        'difficulty_level' => 'medium',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 1,
-        'question_type_id' => 6,
-        'text' => 'A ______ is a blueprint for creating objects.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 1,
-        'question_type_id' => 1,
-        'text' => 'What is the size of a "char" in Java?',
-        'difficulty_level' => 'medium',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 1,
-        'question_type_id' => 3,
-        'text' => 'The "finally" block is executed only if an exception is thrown.',
-        'difficulty_level' => 'medium',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 1,
-        'question_type_id' => 4,
-        'text' => 'Describe the use of the "super" keyword in Java.',
-        'difficulty_level' => 'medium',
-        'marks' => 2,
-    ],
-    [
-        'subject_id' => 1,
-        'question_type_id' => 1,
-        'text' => 'What is the parent class of all Java classes?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 1,
-        'question_type_id' => 6,
-        'text' => 'In Java, the ______ method is used to compare two strings ignoring case.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 1,
-        'question_type_id' => 1,
-        'text' => 'Which method is called when an object is created in Java?',
-        'difficulty_level' => 'medium',
-        'marks' => 2,
-    ],
-    [
-        'subject_id' => 1,
-        'question_type_id' => 3,
-        'text' => 'The "static" keyword can be used with a class.',
-        'difficulty_level' => 'medium',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 1,
-        'question_type_id' => 4,
-        'text' => 'What is method overloading and how is it different from overriding?',
-        'difficulty_level' => 'medium',
-        'marks' => 2,
-    ],
-    [
-        'subject_id' => 1,
-        'question_type_id' => 1,
-        'text' => 'What does OOP stand for?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 1,
-        'question_type_id' => 1,
-        'text' => 'What is the output of 5 + 3 + "2" in Java?',
-        'difficulty_level' => 'medium',
-        'marks' => 2,
-    ],
-
-    // Subject 2: Algorithms (20 questions)
-    [
-        'subject_id' => 2,
-        'question_type_id' => 1,
-        'text' => 'Which sorting algorithm has the worst-case time complexity O(n²)?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 2,
-        'question_type_id' => 3,
-        'text' => 'A stack follows FIFO order.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 2,
-        'question_type_id' => 4,
-        'text' => 'Describe Dijkstra\'s algorithm.',
-        'difficulty_level' => 'hard',
-        'marks' => 2,
-    ],
-    [
-        'subject_id' => 2,
-        'question_type_id' => 6,
-        'text' => 'The height of a balanced binary tree with N nodes is ______.',
-        'difficulty_level' => 'medium',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 2,
-        'question_type_id' => 1,
-        'text' => 'What is the time complexity of binary search?',
-        'difficulty_level' => 'medium',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 2,
-        'question_type_id' => 1,
-        'text' => 'Which data structure uses a hash function?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 2,
-        'question_type_id' => 3,
-        'text' => 'Dynamic programming is mainly used for optimization problems.',
-        'difficulty_level' => 'medium',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 2,
-        'question_type_id' => 4,
-        'text' => 'What is memoization in dynamic programming?',
-        'difficulty_level' => 'medium',
-        'marks' => 2,
-    ],
-    [
-        'subject_id' => 2,
-        'question_type_id' => 1,
-        'text' => 'In a max-heap, the parent node is always:',
-        'difficulty_level' => 'medium',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 2,
-        'question_type_id' => 6,
-        'text' => 'In a graph, the number of edges incident to a vertex is called its ______.',
-        'difficulty_level' => 'medium',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 2,
-        'question_type_id' => 1,
-        'text' => 'Which algorithm uses divide and conquer strategy?',
-        'difficulty_level' => 'medium',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 2,
-        'question_type_id' => 3,
-        'text' => 'A binary tree can have more than two children per node.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 2,
-        'question_type_id' => 4,
-        'text' => 'Explain the difference between BFS and DFS.',
-        'difficulty_level' => 'medium',
-        'marks' => 2,
-    ],
-    [
-        'subject_id' => 2,
-        'question_type_id' => 1,
-        'text' => 'What is the space complexity of merge sort?',
-        'difficulty_level' => 'hard',
-        'marks' => 2,
-    ],
-    [
-        'subject_id' => 2,
-        'question_type_id' => 1,
-        'text' => 'The postfix notation of A+B*C is:',
-        'difficulty_level' => 'hard',
-        'marks' => 2,
-    ],
-    [
-        'subject_id' => 2,
-        'question_type_id' => 3,
-        'text' => 'Breadth-First Search uses a stack data structure.',
-        'difficulty_level' => 'medium',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 2,
-        'question_type_id' => 4,
-        'text' => 'What is a spanning tree?',
-        'difficulty_level' => 'hard',
-        'marks' => 2,
-    ],
-    [
-        'subject_id' => 2,
-        'question_type_id' => 1,
-        'text' => 'Which algorithm finds the shortest path in a weighted graph?',
-        'difficulty_level' => 'medium',
-        'marks' => 2,
-    ],
-    [
-        'subject_id' => 2,
-        'question_type_id' => 6,
-        'text' => 'The process of visiting all nodes in a tree is called ______.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 2,
-        'question_type_id' => 1,
-        'text' => 'Which of the following is a linear data structure?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-
-    // Continue this pattern for subjects 3-5 with similar structure
-    // (Database, Mathematics, Physics) ensuring 20 questions per subject
-    // with mixed question types, difficulties, and marks.
-
-    // Example of remaining structure (truncated for brevity):
-    [
-        'subject_id' => 3,
-        'question_type_id' => 1,
-        'text' => 'Which SQL command deletes a table?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 3,
-        'question_type_id' => 3,
-        'text' => 'A primary key can have NULL values.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 4,
-        'question_type_id' => 1,
-        'text' => 'What is the integral of 1/x?',
-        'difficulty_level' => 'medium',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 5,
-        'question_type_id' => 3,
-        'text' => 'The speed of light is constant.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-
             [
-    [
-        'subject_id' => 1,
-        'question_type_id' => 1, // MCQ
-        'text' => 'Which of the following is a linear data structure?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 1,
-        'question_type_id' => 3, // True/False
-        'text' => 'Python is a statically typed programming language.',
-        'difficulty_level' => 'medium',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 2,
-        'question_type_id' => 1, // MCQ
-        'text' => 'What is the worst-case time complexity of bubble sort?',
-        'difficulty_level' => 'medium',
-        'marks' => 2,
-    ],
-    [
-        'subject_id' => 2,
-        'question_type_id' => 3, // True/False
-        'text' => 'A stack follows the FIFO principle.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 3,
-        'question_type_id' => 1, // MCQ
-        'text' => 'Which SQL clause is used to filter records?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 3,
-        'question_type_id' => 6, // Fill in the Blank
-        'text' => 'The ______ statement is used to delete records from a table.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 4,
-        'question_type_id' => 1, // MCQ
-        'text' => 'What is the derivative of ln(x)?',
-        'difficulty_level' => 'medium',
-        'marks' => 2,
-    ],
-    [
-        'subject_id' => 4,
-        'question_type_id' => 3, // True/False
-        'text' => 'The integral of a constant is always zero.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 5,
-        'question_type_id' => 1, // MCQ
-        'text' => 'What is the SI unit of force?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 5,
-        'question_type_id' => 6, // Fill in the Blank
-        'text' => 'The formula for kinetic energy is ______.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 1,
-        'question_type_id' => 1, // MCQ
-        'text' => 'Which of the following is not a programming paradigm?',
-        'difficulty_level' => 'medium',
-        'marks' => 2,
-    ],
-    [
-        'subject_id' => 1,
-        'question_type_id' => 3, // True/False
-        'text' => 'C++ supports multiple inheritance.',
-        'difficulty_level' => 'medium',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 2,
-        'question_type_id' => 1, // MCQ
-        'text' => 'Which data structure uses LIFO principle?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 2,
-        'question_type_id' => 6, // Fill in the Blank
-        'text' => 'The time complexity of binary search is ______.',
-        'difficulty_level' => 'medium',
-        'marks' => 2,
-    ],
-    [
-        'subject_id' => 3,
-        'question_type_id' => 1, // MCQ
-        'text' => 'Which SQL keyword is used to sort the result set?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 3,
-        'question_type_id' => 3, // True/False
-        'text' => 'A primary key can have NULL values.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 4,
-        'question_type_id' => 1, // MCQ
-        'text' => 'What is the limit of (1 + 1/n)^n as n approaches infinity?',
-        'difficulty_level' => 'hard',
-        'marks' => 3,
-    ],
-    [
-        'subject_id' => 4,
-        'question_type_id' => 6, // Fill in the Blank
-        'text' => 'The derivative of x^2 is ______.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 5,
-        'question_type_id' => 1, // MCQ
-        'text' => 'What is the unit of electric current?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 5,
-        'question_type_id' => 3, // True/False
-        'text' => 'The nucleus of an atom is positively charged.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 1,
-        'question_type_id' => 1, // MCQ
-        'text' => 'Which of the following is a compiled language?',
-        'difficulty_level' => 'medium',
-        'marks' => 2,
-    ],
-    [
-        'subject_id' => 1,
-        'question_type_id' => 6, // Fill in the Blank
-        'text' => 'The process of finding and fixing errors in code is called ______.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 2,
-        'question_type_id' => 1, // MCQ
-        'text' => 'Which algorithm is used for finding the shortest path in a graph?',
-        'difficulty_level' => 'medium',
-        'marks' => 2,
-    ],
-    [
-        'subject_id' => 2,
-        'question_type_id' => 3, // True/False
-        'text' => 'A queue follows the LIFO principle.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 3,
-        'question_type_id' => 1, // MCQ
-        'text' => 'Which SQL statement is used to create a new table?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 3,
-        'question_type_id' => 6, // Fill in the Blank
-        'text' => 'The ______ keyword is used to select unique records from a table.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 4,
-        'question_type_id' => 1, // MCQ
-        'text' => 'What is the value of sin(π/2)?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 4,
-        'question_type_id' => 3, // True/False
-        'text' => 'The derivative of a constant is zero.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 5,
-        'question_type_id' => 1, // MCQ
-        'text' => 'What is the unit of energy?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 5,
-        'question_type_id' => 6, // Fill in the Blank
-        'text' => 'The formula for work done is ______.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 1,
-        'question_type_id' => 1, // MCQ
-        'text' => 'Which of the following is a dynamically typed language?',
-        'difficulty_level' => 'medium',
-        'marks' => 2,
-    ],
-    [
-        'subject_id' => 1,
-        'question_type_id' => 3, // True/False
-        'text' => 'JavaScript is a single-threaded language.',
-        'difficulty_level' => 'medium',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 2,
-        'question_type_id' => 1, // MCQ
-        'text' => 'Which sorting algorithm has the best average-case time complexity?',
-        'difficulty_level' => 'medium',
-        'marks' => 2,
-    ],
-    [
-        'subject_id' => 2,
-        'question_type_id' => 6, // Fill in the Blank
-        'text' => 'The time complexity of merge sort is ______.',
-        'difficulty_level' => 'medium',
-        'marks' => 2,
-    ],
-    [
-        'subject_id' => 3,
-        'question_type_id' => 1, // MCQ
-        'text' => 'Which SQL statement is used to delete a table?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 3,
-        'question_type_id' => 3, // True/False
-        'text' => 'A foreign key can have duplicate values.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 4,
-        'question_type_id' => 1, // MCQ
-        'text' => 'What is the value of cos(0)?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 4,
-        'question_type_id' => 6, // Fill in the Blank
-        'text' => 'The integral of 1/x is ______.',
-        'difficulty_level' => 'medium',
-        'marks' => 2,
-    ],
-    [
-        'subject_id' => 5,
-        'question_type_id' => 1, // MCQ
-        'text' => 'What is the unit of power?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 5,
-        'question_type_id' => 3, // True/False
-        'text' => 'The speed of sound is greater in solids than in gases.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 1,
-        'question_type_id' => 1, // MCQ
-        'text' => 'Which of the following is a functional programming language?',
-        'difficulty_level' => 'medium',
-        'marks' => 2,
-    ],
-    [
-        'subject_id' => 1,
-        'question_type_id' => 6, // Fill in the Blank
-        'text' => 'The process of converting code into machine language is called ______.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 2,
-        'question_type_id' => 1, // MCQ
-        'text' => 'Which data structure is used for implementing recursion?',
-        'difficulty_level' => 'medium',
-        'marks' => 2,
-    ],
-    [
-        'subject_id' => 2,
-        'question_type_id' => 3, // True/False
-        'text' => 'A linked list is a linear data structure.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 3,
-        'question_type_id' => 1, // MCQ
-        'text' => 'Which SQL statement is used to add a new column to a table?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 3,
-        'question_type_id' => 6, // Fill in the Blank
-        'text' => 'The ______ statement is used to combine rows from two or more tables.',
-        'difficulty_level' => 'medium',
-        'marks' => 2,
-    ],
-    [
-        'subject_id' => 4,
-        'question_type_id' => 1, // MCQ
-        'text' => 'What is the value of tan(π/4)?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 4,
-        'question_type_id' => 3, // True/False
-        'text' => 'The derivative of a sum is the sum of the derivatives.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 5,
-        'question_type_id' => 1, // MCQ
-        'text' => 'What is the unit of electric charge?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 5,
-        'question_type_id' => 6, // Fill in the Blank
-        'text' => 'The formula for power is ______.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 1,
-        'question_type_id' => 1, // MCQ
-        'text' => 'Which of the following is a scripting language?',
-        'difficulty_level' => 'medium',
-        'marks' => 2,
-    ],
-    [
-        'subject_id' => 1,
-        'question_type_id' => 3, // True/False
-        'text' => 'HTML is a programming language.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 2,
-        'question_type_id' => 1, // MCQ
-        'text' => 'Which algorithm is used for matrix multiplication?',
-        'difficulty_level' => 'medium',
-        'marks' => 2,
-    ],
-    [
-        'subject_id' => 2,
-        'question_type_id' => 6, // Fill in the Blank
-        'text' => 'The time complexity of insertion sort is ______.',
-        'difficulty_level' => 'medium',
-        'marks' => 2,
-    ],
-    [
-        'subject_id' => 3,
-        'question_type_id' => 1, // MCQ
-        'text' => 'Which SQL statement is used to remove a column from a table?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 3,
-        'question_type_id' => 3, // True/False
-        'text' => 'A view in SQL is a physical table.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 4,
-        'question_type_id' => 1, // MCQ
-        'text' => 'What is the value of sin(0)?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 4,
-        'question_type_id' => 6, // Fill in the Blank
-        'text' => 'The integral of cos(x) is ______.',
-        'difficulty_level' => 'medium',
-        'marks' => 2,
-    ],
-    [
-        'subject_id' => 5,
-        'question_type_id' => 1, // MCQ
-        'text' => 'What is the unit of resistance?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 5,
-        'question_type_id' => 3, // True/False
-        'text' => 'The force of gravity is stronger on the Moon than on Earth.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 1,
-        'question_type_id' => 1, // MCQ
-        'text' => 'Which of the following is a markup language?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 1,
-        'question_type_id' => 6, // Fill in the Blank
-        'text' => 'The process of converting high-level code to machine code is called ______.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 2,
-        'question_type_id' => 1, // MCQ
-        'text' => 'Which data structure is used for implementing a priority queue?',
-        'difficulty_level' => 'medium',
-        'marks' => 2,
-    ],
-    [
-        'subject_id' => 2,
-        'question_type_id' => 3, // True/False
-        'text' => 'A binary search tree is always balanced.',
-        'difficulty_level' => 'medium',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 3,
-        'question_type_id' => 1, // MCQ
-        'text' => 'Which SQL statement is used to rename a table?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 3,
-        'question_type_id' => 6, // Fill in the Blank
-        'text' => 'The ______ keyword is used to filter groups in SQL.',
-        'difficulty_level' => 'medium',
-        'marks' => 2,
-    ],
+                'subject_id' => 1,
+                'question_type_id' => 1,
+                'text' => 'Which keyword is used to define a class in Java?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
             [
-    [
-        'subject_id' => 1,
-        'question_type_id' => 1, // MCQ
-        'text' => 'Which of the following is a high-level programming language?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 1,
-        'question_type_id' => 3, // True/False
-        'text' => 'Python supports method overloading by default.',
-        'difficulty_level' => 'medium',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 2,
-        'question_type_id' => 1, // MCQ
-        'text' => 'Which algorithm is used to find the minimum spanning tree of a graph?',
-        'difficulty_level' => 'medium',
-        'marks' => 2,
-    ],
-    [
-        'subject_id' => 2,
-        'question_type_id' => 3, // True/False
-        'text' => 'A hash table guarantees O(1) time complexity for all operations.',
-        'difficulty_level' => 'medium',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 3,
-        'question_type_id' => 1, // MCQ
-        'text' => 'Which SQL keyword is used to retrieve unique values from a column?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 3,
-        'question_type_id' => 6, // Fill in the Blank
-        'text' => 'The ______ clause is used to group rows that have the same values.',
-        'difficulty_level' => 'medium',
-        'marks' => 2,
-    ],
-    [
-        'subject_id' => 4,
-        'question_type_id' => 1, // MCQ
-        'text' => 'What is the value of the derivative of a constant function?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 4,
-        'question_type_id' => 3, // True/False
-        'text' => 'The integral of a function represents the area under its curve.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 5,
-        'question_type_id' => 1, // MCQ
-        'text' => 'What is the SI unit of frequency?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 5,
-        'question_type_id' => 6, // Fill in the Blank
-        'text' => 'The formula for gravitational force is ______.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 1,
-        'question_type_id' => 1, // MCQ
-        'text' => 'Which of the following is a dynamically typed language?',
-        'difficulty_level' => 'medium',
-        'marks' => 2,
-    ],
-    [
-        'subject_id' => 1,
-        'question_type_id' => 3, // True/False
-        'text' => 'C++ supports garbage collection.',
-        'difficulty_level' => 'medium',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 2,
-        'question_type_id' => 1, // MCQ
-        'text' => 'Which data structure is used for implementing a LIFO system?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 2,
-        'question_type_id' => 6, // Fill in the Blank
-        'text' => 'The time complexity of heap sort is ______.',
-        'difficulty_level' => 'medium',
-        'marks' => 2,
-    ],
-    [
-        'subject_id' => 3,
-        'question_type_id' => 1, // MCQ
-        'text' => 'Which SQL statement is used to create a new database?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 3,
-        'question_type_id' => 3, // True/False
-        'text' => 'A primary key can contain duplicate values.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 4,
-        'question_type_id' => 1, // MCQ
-        'text' => 'What is the value of the integral of 0?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 4,
-        'question_type_id' => 6, // Fill in the Blank
-        'text' => 'The derivative of sin(x) is ______.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 5,
-        'question_type_id' => 1, // MCQ
-        'text' => 'What is the unit of electric potential?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 5,
-        'question_type_id' => 3, // True/False
-        'text' => 'The speed of light is faster in water than in air.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 1,
-        'question_type_id' => 1, // MCQ
-        'text' => 'Which of the following is a statically typed language?',
-        'difficulty_level' => 'medium',
-        'marks' => 2,
-    ],
-    [
-        'subject_id' => 1,
-        'question_type_id' => 6, // Fill in the Blank
-        'text' => 'The process of converting source code into machine code is called ______.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 2,
-        'question_type_id' => 1, // MCQ
-        'text' => 'Which algorithm is used to find the shortest path in a weighted graph?',
-        'difficulty_level' => 'medium',
-        'marks' => 2,
-    ],
-    [
-        'subject_id' => 2,
-        'question_type_id' => 3, // True/False
-        'text' => 'A binary tree can have more than two children per node.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 3,
-        'question_type_id' => 1, // MCQ
-        'text' => 'Which SQL statement is used to modify the structure of a table?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 3,
-        'question_type_id' => 6, // Fill in the Blank
-        'text' => 'The ______ keyword is used to sort the result set in descending order.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 4,
-        'question_type_id' => 1, // MCQ
-        'text' => 'What is the value of the derivative of x^3?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 4,
-        'question_type_id' => 3, // True/False
-        'text' => 'The integral of a function can be negative.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 5,
-        'question_type_id' => 1, // MCQ
-        'text' => 'What is the unit of capacitance?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 5,
-        'question_type_id' => 6, // Fill in the Blank
-        'text' => 'The formula for Ohm\'s Law is ______.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 1,
-        'question_type_id' => 1, // MCQ
-        'text' => 'Which of the following is a scripting language?',
-        'difficulty_level' => 'medium',
-        'marks' => 2,
-    ],
-    [
-        'subject_id' => 1,
-        'question_type_id' => 3, // True/False
-        'text' => 'JavaScript is a case-sensitive language.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 2,
-        'question_type_id' => 1, // MCQ
-        'text' => 'Which sorting algorithm has a worst-case time complexity of O(n log n)?',
-        'difficulty_level' => 'medium',
-        'marks' => 2,
-    ],
-    [
-        'subject_id' => 2,
-        'question_type_id' => 6, // Fill in the Blank
-        'text' => 'The time complexity of selection sort is ______.',
-        'difficulty_level' => 'medium',
-        'marks' => 2,
-    ],
-    [
-        'subject_id' => 3,
-        'question_type_id' => 1, // MCQ
-        'text' => 'Which SQL statement is used to delete a database?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 3,
-        'question_type_id' => 3, // True/False
-        'text' => 'A foreign key can reference a non-primary key column.',
-        'difficulty_level' => 'medium',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 4,
-        'question_type_id' => 1, // MCQ
-        'text' => 'What is the value of the integral of 2x?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 4,
-        'question_type_id' => 6, // Fill in the Blank
-        'text' => 'The derivative of cos(x) is ______.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 5,
-        'question_type_id' => 1, // MCQ
-        'text' => 'What is the unit of magnetic flux?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 5,
-        'question_type_id' => 3, // True/False
-        'text' => 'The Earth\'s magnetic field is strongest at the equator.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 1,
-        'question_type_id' => 1, // MCQ
-        'text' => 'Which of the following is a markup language?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 1,
-        'question_type_id' => 6, // Fill in the Blank
-        'text' => 'The process of finding errors in code is called ______.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 2,
-        'question_type_id' => 1, // MCQ
-        'text' => 'Which data structure is used for implementing a FIFO system?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 2,
-        'question_type_id' => 3, // True/False
-        'text' => 'A binary search tree is always a balanced tree.',
-        'difficulty_level' => 'medium',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 3,
-        'question_type_id' => 1, // MCQ
-        'text' => 'Which SQL statement is used to add a new row to a table?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 3,
-        'question_type_id' => 6, // Fill in the Blank
-        'text' => 'The ______ keyword is used to filter rows in SQL.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 4,
-        'question_type_id' => 1, // MCQ
-        'text' => 'What is the value of the derivative of e^x?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 4,
-        'question_type_id' => 3, // True/False
-        'text' => 'The integral of a function is always positive.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 5,
-        'question_type_id' => 1, // MCQ
-        'text' => 'What is the unit of inductance?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 5,
-        'question_type_id' => 6, // Fill in the Blank
-        'text' => 'The formula for potential energy is ______.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 1,
-        'question_type_id' => 1, // MCQ
-        'text' => 'Which of the following is a compiled language?',
-        'difficulty_level' => 'medium',
-        'marks' => 2,
-    ],
-    [
-        'subject_id' => 1,
-        'question_type_id' => 3, // True/False
-        'text' => 'Java is platform-independent.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 2,
-        'question_type_id' => 1, // MCQ
-        'text' => 'Which algorithm is used to detect cycles in a graph?',
-        'difficulty_level' => 'medium',
-        'marks' => 2,
-    ],
-    [
-        'subject_id' => 2,
-        'question_type_id' => 6, // Fill in the Blank
-        'text' => 'The time complexity of bubble sort is ______.',
-        'difficulty_level' => 'medium',
-        'marks' => 2,
-    ],
-    [
-        'subject_id' => 3,
-        'question_type_id' => 1, // MCQ
-        'text' => 'Which SQL statement is used to change the data type of a column?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 3,
-        'question_type_id' => 3, // True/False
-        'text' => 'A unique key can have NULL values.',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    [
-        'subject_id' => 4,
-        'question_type_id' => 1, // MCQ
-        'text' => 'What is the value of the integral of x^2?',
-        'difficulty_level' => 'easy',
-        'marks' => 1,
-    ],
-    
+                'subject_id' => 1,
+                'question_type_id' => 3,
+                'text' => 'Python uses static typing.',
+                'difficulty_level' => 'medium',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 1,
+                'question_type_id' => 4,
+                'text' => 'Explain polymorphism with an example.',
+                'difficulty_level' => 'medium',
+                'marks' => 2,
+            ],
+            [
+                'subject_id' => 1,
+                'question_type_id' => 6,
+                'text' => 'In Java, the ______ keyword is used to inherit a class.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 1,
+                'question_type_id' => 1,
+                'text' => 'What is the default value of a boolean variable in Java?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 1,
+                'question_type_id' => 1,
+                'text' => 'Which data structure uses LIFO principle?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 1,
+                'question_type_id' => 3,
+                'text' => 'Java supports multiple inheritance for classes.',
+                'difficulty_level' => 'medium',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 1,
+                'question_type_id' => 4,
+                'text' => 'What are access modifiers in Java? List them.',
+                'difficulty_level' => 'easy',
+                'marks' => 2,
+            ],
+            [
+                'subject_id' => 1,
+                'question_type_id' => 1,
+                'text' => 'Which loop is guaranteed to execute at least once in Java?',
+                'difficulty_level' => 'medium',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 1,
+                'question_type_id' => 6,
+                'text' => 'A ______ is a blueprint for creating objects.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 1,
+                'question_type_id' => 1,
+                'text' => 'What is the size of a "char" in Java?',
+                'difficulty_level' => 'medium',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 1,
+                'question_type_id' => 3,
+                'text' => 'The "finally" block is executed only if an exception is thrown.',
+                'difficulty_level' => 'medium',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 1,
+                'question_type_id' => 4,
+                'text' => 'Describe the use of the "super" keyword in Java.',
+                'difficulty_level' => 'medium',
+                'marks' => 2,
+            ],
+            [
+                'subject_id' => 1,
+                'question_type_id' => 1,
+                'text' => 'What is the parent class of all Java classes?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 1,
+                'question_type_id' => 6,
+                'text' => 'In Java, the ______ method is used to compare two strings ignoring case.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 1,
+                'question_type_id' => 1,
+                'text' => 'Which method is called when an object is created in Java?',
+                'difficulty_level' => 'medium',
+                'marks' => 2,
+            ],
+            [
+                'subject_id' => 1,
+                'question_type_id' => 3,
+                'text' => 'The "static" keyword can be used with a class.',
+                'difficulty_level' => 'medium',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 1,
+                'question_type_id' => 4,
+                'text' => 'What is method overloading and how is it different from overriding?',
+                'difficulty_level' => 'medium',
+                'marks' => 2,
+            ],
+            [
+                'subject_id' => 1,
+                'question_type_id' => 1,
+                'text' => 'What does OOP stand for?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 1,
+                'question_type_id' => 1,
+                'text' => 'What is the output of 5 + 3 + "2" in Java?',
+                'difficulty_level' => 'medium',
+                'marks' => 2,
+            ],
+            [
+                'subject_id' => 2,
+                'question_type_id' => 1,
+                'text' => 'Which sorting algorithm has the worst-case time complexity O(n²)?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 2,
+                'question_type_id' => 3,
+                'text' => 'A stack follows FIFO order.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 2,
+                'question_type_id' => 4,
+                'text' => 'Describe Dijkstra\'s algorithm.',
+                'difficulty_level' => 'hard',
+                'marks' => 2,
+            ],
+            [
+                'subject_id' => 2,
+                'question_type_id' => 6,
+                'text' => 'The height of a balanced binary tree with N nodes is ______.',
+                'difficulty_level' => 'medium',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 2,
+                'question_type_id' => 1,
+                'text' => 'What is the time complexity of binary search?',
+                'difficulty_level' => 'medium',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 2,
+                'question_type_id' => 1,
+                'text' => 'Which data structure uses a hash function?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 2,
+                'question_type_id' => 3,
+                'text' => 'Dynamic programming is mainly used for optimization problems.',
+                'difficulty_level' => 'medium',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 2,
+                'question_type_id' => 4,
+                'text' => 'What is memoization in dynamic programming?',
+                'difficulty_level' => 'medium',
+                'marks' => 2,
+            ],
+            [
+                'subject_id' => 2,
+                'question_type_id' => 1,
+                'text' => 'In a max-heap, the parent node is always:',
+                'difficulty_level' => 'medium',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 2,
+                'question_type_id' => 6,
+                'text' => 'In a graph, the number of edges incident to a vertex is called its ______.',
+                'difficulty_level' => 'medium',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 2,
+                'question_type_id' => 1,
+                'text' => 'Which algorithm uses divide and conquer strategy?',
+                'difficulty_level' => 'medium',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 2,
+                'question_type_id' => 3,
+                'text' => 'A binary tree can have more than two children per node.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 2,
+                'question_type_id' => 4,
+                'text' => 'Explain the difference between BFS and DFS.',
+                'difficulty_level' => 'medium',
+                'marks' => 2,
+            ],
+            [
+                'subject_id' => 2,
+                'question_type_id' => 1,
+                'text' => 'What is the space complexity of merge sort?',
+                'difficulty_level' => 'hard',
+                'marks' => 2,
+            ],
+            [
+                'subject_id' => 2,
+                'question_type_id' => 1,
+                'text' => 'The postfix notation of A+B*C is:',
+                'difficulty_level' => 'hard',
+                'marks' => 2,
+            ],
+            [
+                'subject_id' => 2,
+                'question_type_id' => 3,
+                'text' => 'Breadth-First Search uses a stack data structure.',
+                'difficulty_level' => 'medium',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 2,
+                'question_type_id' => 4,
+                'text' => 'What is a spanning tree?',
+                'difficulty_level' => 'hard',
+                'marks' => 2,
+            ],
+            [
+                'subject_id' => 2,
+                'question_type_id' => 1,
+                'text' => 'Which algorithm finds the shortest path in a weighted graph?',
+                'difficulty_level' => 'medium',
+                'marks' => 2,
+            ],
+            [
+                'subject_id' => 2,
+                'question_type_id' => 6,
+                'text' => 'The process of visiting all nodes in a tree is called ______.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 2,
+                'question_type_id' => 1,
+                'text' => 'Which of the following is a linear data structure?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 3,
+                'question_type_id' => 1,
+                'text' => 'Which SQL command deletes a table?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 3,
+                'question_type_id' => 3,
+                'text' => 'A primary key can have NULL values.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 4,
+                'question_type_id' => 1,
+                'text' => 'What is the integral of 1/x?',
+                'difficulty_level' => 'medium',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 5,
+                'question_type_id' => 3,
+                'text' => 'The speed of light is constant.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 5,
+                'question_type_id' => 1,
+                'text' => 'What is the SI unit of force?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 6,
+                'question_type_id' => 1,
+                'text' => 'What is the chemical symbol for gold?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 6,
+                'question_type_id' => 3,
+                'text' => 'Acids turn blue litmus paper red.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 7,
+                'question_type_id' => 1,
+                'text' => 'What is the powerhouse of the cell?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 7,
+                'question_type_id' => 3,
+                'text' => 'Photosynthesis occurs in animal cells.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 8,
+                'question_type_id' => 1,
+                'text' => 'What is the term for a word that is opposite in meaning to another word?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 8,
+                'question_type_id' => 3,
+                'text' => 'A thesis statement is typically placed at the end of the introduction paragraph.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 9,
+                'question_type_id' => 1,
+                'text' => 'Who was the first Caliph of Islam?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 9,
+                'question_type_id' => 3,
+                'text' => 'The Quran was compiled into a single book during the lifetime of Prophet Muhammad (PBUH).',
+                'difficulty_level' => 'medium',
+                'marks' => 2,
+            ],
+            [
+                'subject_id' => 1,
+                'question_type_id' => 1, // MCQ
+                'text' => 'Which of the following is a linear data structure?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 1,
+                'question_type_id' => 3, // True/False
+                'text' => 'Python is a statically typed programming language.',
+                'difficulty_level' => 'medium',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 2,
+                'question_type_id' => 1, // MCQ
+                'text' => 'What is the worst-case time complexity of bubble sort?',
+                'difficulty_level' => 'medium',
+                'marks' => 2,
+            ],
+            [
+                'subject_id' => 2,
+                'question_type_id' => 3, // True/False
+                'text' => 'A stack follows the FIFO principle.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 3,
+                'question_type_id' => 1, // MCQ
+                'text' => 'Which SQL clause is used to filter records?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 3,
+                'question_type_id' => 6, // Fill in the Blank
+                'text' => 'The ______ statement is used to delete records from a table.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 4,
+                'question_type_id' => 1, // MCQ
+                'text' => 'What is the derivative of ln(x)?',
+                'difficulty_level' => 'medium',
+                'marks' => 2,
+            ],
+            [
+                'subject_id' => 4,
+                'question_type_id' => 3, // True/False
+                'text' => 'The integral of a constant is always zero.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 5,
+                'question_type_id' => 1, // MCQ
+                'text' => 'What is the SI unit of force?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 5,
+                'question_type_id' => 6, // Fill in the Blank
+                'text' => 'The formula for kinetic energy is ______.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 1,
+                'question_type_id' => 1, // MCQ
+                'text' => 'Which of the following is not a programming paradigm?',
+                'difficulty_level' => 'medium',
+                'marks' => 2,
+            ],
+            [
+                'subject_id' => 1,
+                'question_type_id' => 3, // True/False
+                'text' => 'C++ supports multiple inheritance.',
+                'difficulty_level' => 'medium',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 2,
+                'question_type_id' => 1, // MCQ
+                'text' => 'Which data structure uses LIFO principle?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 2,
+                'question_type_id' => 6, // Fill in the Blank
+                'text' => 'The time complexity of binary search is ______.',
+                'difficulty_level' => 'medium',
+                'marks' => 2,
+            ],
+            [
+                'subject_id' => 3,
+                'question_type_id' => 1, // MCQ
+                'text' => 'Which SQL keyword is used to sort the result set?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 3,
+                'question_type_id' => 3, // True/False
+                'text' => 'A primary key can have NULL values.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 4,
+                'question_type_id' => 1, // MCQ
+                'text' => 'What is the limit of (1 + 1/n)^n as n approaches infinity?',
+                'difficulty_level' => 'hard',
+                'marks' => 3,
+            ],
+            [
+                'subject_id' => 4,
+                'question_type_id' => 6, // Fill in the Blank
+                'text' => 'The derivative of x^2 is ______.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 5,
+                'question_type_id' => 1, // MCQ
+                'text' => 'What is the unit of electric current?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 5,
+                'question_type_id' => 3, // True/False
+                'text' => 'The nucleus of an atom is positively charged.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 1,
+                'question_type_id' => 1, // MCQ
+                'text' => 'Which of the following is a compiled language?',
+                'difficulty_level' => 'medium',
+                'marks' => 2,
+            ],
+            [
+                'subject_id' => 1,
+                'question_type_id' => 6, // Fill in the Blank
+                'text' => 'The process of finding and fixing errors in code is called ______.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 2,
+                'question_type_id' => 1, // MCQ
+                'text' => 'Which algorithm is used for finding the shortest path in a graph?',
+                'difficulty_level' => 'medium',
+                'marks' => 2,
+            ],
+            [
+                'subject_id' => 2,
+                'question_type_id' => 3, // True/False
+                'text' => 'A queue follows the LIFO principle.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 3,
+                'question_type_id' => 1, // MCQ
+                'text' => 'Which SQL statement is used to create a new table?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 3,
+                'question_type_id' => 6, // Fill in the Blank
+                'text' => 'The ______ keyword is used to select unique records from a table.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 4,
+                'question_type_id' => 1, // MCQ
+                'text' => 'What is the value of sin(π/2)?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 4,
+                'question_type_id' => 3, // True/False
+                'text' => 'The derivative of a constant is zero.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 5,
+                'question_type_id' => 1, // MCQ
+                'text' => 'What is the unit of energy?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 5,
+                'question_type_id' => 6, // Fill in the Blank
+                'text' => 'The formula for work done is ______.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 1,
+                'question_type_id' => 1, // MCQ
+                'text' => 'Which of the following is a dynamically typed language?',
+                'difficulty_level' => 'medium',
+                'marks' => 2,
+            ],
+            [
+                'subject_id' => 1,
+                'question_type_id' => 3, // True/False
+                'text' => 'JavaScript is a single-threaded language.',
+                'difficulty_level' => 'medium',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 2,
+                'question_type_id' => 1, // MCQ
+                'text' => 'Which sorting algorithm has the best average-case time complexity?',
+                'difficulty_level' => 'medium',
+                'marks' => 2,
+            ],
+            [
+                'subject_id' => 2,
+                'question_type_id' => 6, // Fill in the Blank
+                'text' => 'The time complexity of merge sort is ______.',
+                'difficulty_level' => 'medium',
+                'marks' => 2,
+            ],
+            [
+                'subject_id' => 3,
+                'question_type_id' => 1, // MCQ
+                'text' => 'Which SQL statement is used to delete a table?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 3,
+                'question_type_id' => 3, // True/False
+                'text' => 'A foreign key can have duplicate values.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 4,
+                'question_type_id' => 1, // MCQ
+                'text' => 'What is the value of cos(0)?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 4,
+                'question_type_id' => 6, // Fill in the Blank
+                'text' => 'The integral of 1/x is ______.',
+                'difficulty_level' => 'medium',
+                'marks' => 2,
+            ],
+            [
+                'subject_id' => 5,
+                'question_type_id' => 1, // MCQ
+                'text' => 'What is the unit of power?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 5,
+                'question_type_id' => 3, // True/False
+                'text' => 'The speed of sound is greater in solids than in gases.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 1,
+                'question_type_id' => 1, // MCQ
+                'text' => 'Which of the following is a functional programming language?',
+                'difficulty_level' => 'medium',
+                'marks' => 2,
+            ],
+            [
+                'subject_id' => 1,
+                'question_type_id' => 6, // Fill in the Blank
+                'text' => 'The process of converting code into machine language is called ______.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 2,
+                'question_type_id' => 1, // MCQ
+                'text' => 'Which data structure is used for implementing recursion?',
+                'difficulty_level' => 'medium',
+                'marks' => 2,
+            ],
+            [
+                'subject_id' => 2,
+                'question_type_id' => 3, // True/False
+                'text' => 'A linked list is a linear data structure.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 3,
+                'question_type_id' => 1, // MCQ
+                'text' => 'Which SQL statement is used to add a new column to a table?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 3,
+                'question_type_id' => 6, // Fill in the Blank
+                'text' => 'The ______ statement is used to combine rows from two or more tables.',
+                'difficulty_level' => 'medium',
+                'marks' => 2,
+            ],
+            [
+                'subject_id' => 4,
+                'question_type_id' => 1, // MCQ
+                'text' => 'What is the value of tan(π/4)?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 4,
+                'question_type_id' => 3, // True/False
+                'text' => 'The derivative of a sum is the sum of the derivatives.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 5,
+                'question_type_id' => 1, // MCQ
+                'text' => 'What is the unit of electric charge?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 5,
+                'question_type_id' => 6, // Fill in the Blank
+                'text' => 'The formula for power is ______.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 1,
+                'question_type_id' => 1, // MCQ
+                'text' => 'Which of the following is a scripting language?',
+                'difficulty_level' => 'medium',
+                'marks' => 2,
+            ],
+            [
+                'subject_id' => 1,
+                'question_type_id' => 3, // True/False
+                'text' => 'HTML is a programming language.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 2,
+                'question_type_id' => 1, // MCQ
+                'text' => 'Which algorithm is used for matrix multiplication?',
+                'difficulty_level' => 'medium',
+                'marks' => 2,
+            ],
+            [
+                'subject_id' => 2,
+                'question_type_id' => 6, // Fill in the Blank
+                'text' => 'The time complexity of insertion sort is ______.',
+                'difficulty_level' => 'medium',
+                'marks' => 2,
+            ],
+            [
+                'subject_id' => 3,
+                'question_type_id' => 1, // MCQ
+                'text' => 'Which SQL statement is used to remove a column from a table?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 3,
+                'question_type_id' => 3, // True/False
+                'text' => 'A view in SQL is a physical table.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 4,
+                'question_type_id' => 1, // MCQ
+                'text' => 'What is the value of sin(0)?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 4,
+                'question_type_id' => 6, // Fill in the Blank
+                'text' => 'The integral of cos(x) is ______.',
+                'difficulty_level' => 'medium',
+                'marks' => 2,
+            ],
+            [
+                'subject_id' => 5,
+                'question_type_id' => 1, // MCQ
+                'text' => 'What is the unit of resistance?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 5,
+                'question_type_id' => 3, // True/False
+                'text' => 'The force of gravity is stronger on the Moon than on Earth.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 1,
+                'question_type_id' => 1, // MCQ
+                'text' => 'Which of the following is a markup language?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 1,
+                'question_type_id' => 6, // Fill in the Blank
+                'text' => 'The process of converting high-level code to machine code is called ______.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 2,
+                'question_type_id' => 1, // MCQ
+                'text' => 'Which data structure is used for implementing a priority queue?',
+                'difficulty_level' => 'medium',
+                'marks' => 2,
+            ],
+            [
+                'subject_id' => 2,
+                'question_type_id' => 3, // True/False
+                'text' => 'A binary search tree is always balanced.',
+                'difficulty_level' => 'medium',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 3,
+                'question_type_id' => 1, // MCQ
+                'text' => 'Which SQL statement is used to rename a table?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 3,
+                'question_type_id' => 6, // Fill in the Blank
+                'text' => 'The ______ keyword is used to filter groups in SQL.',
+                'difficulty_level' => 'medium',
+                'marks' => 2,
+            ],
+            [
+                'subject_id' => 1,
+                'question_type_id' => 1, // MCQ
+                'text' => 'Which of the following is a high-level programming language?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 1,
+                'question_type_id' => 3, // True/False
+                'text' => 'Python supports method overloading by default.',
+                'difficulty_level' => 'medium',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 2,
+                'question_type_id' => 1, // MCQ
+                'text' => 'Which algorithm is used to find the minimum spanning tree of a graph?',
+                'difficulty_level' => 'medium',
+                'marks' => 2,
+            ],
+            [
+                'subject_id' => 2,
+                'question_type_id' => 3, // True/False
+                'text' => 'A hash table guarantees O(1) time complexity for all operations.',
+                'difficulty_level' => 'medium',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 3,
+                'question_type_id' => 1, // MCQ
+                'text' => 'Which SQL keyword is used to retrieve unique values from a column?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 3,
+                'question_type_id' => 6, // Fill in the Blank
+                'text' => 'The ______ clause is used to group rows that have the same values.',
+                'difficulty_level' => 'medium',
+                'marks' => 2,
+            ],
+            [
+                'subject_id' => 4,
+                'question_type_id' => 1, // MCQ
+                'text' => 'What is the value of the derivative of a constant function?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 4,
+                'question_type_id' => 3, // True/False
+                'text' => 'The integral of a function represents the area under its curve.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 5,
+                'question_type_id' => 1, // MCQ
+                'text' => 'What is the SI unit of frequency?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 5,
+                'question_type_id' => 6, // Fill in the Blank
+                'text' => 'The formula for gravitational force is ______.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 1,
+                'question_type_id' => 1, // MCQ
+                'text' => 'Which of the following is a dynamically typed language?',
+                'difficulty_level' => 'medium',
+                'marks' => 2,
+            ],
+            [
+                'subject_id' => 1,
+                'question_type_id' => 3, // True/False
+                'text' => 'C++ supports garbage collection.',
+                'difficulty_level' => 'medium',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 2,
+                'question_type_id' => 1, // MCQ
+                'text' => 'Which data structure is used for implementing a LIFO system?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 2,
+                'question_type_id' => 6, // Fill in the Blank
+                'text' => 'The time complexity of heap sort is ______.',
+                'difficulty_level' => 'medium',
+                'marks' => 2,
+            ],
+            [
+                'subject_id' => 3,
+                'question_type_id' => 1, // MCQ
+                'text' => 'Which SQL statement is used to create a new database?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 3,
+                'question_type_id' => 3, // True/False
+                'text' => 'A primary key can contain duplicate values.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 4,
+                'question_type_id' => 1, // MCQ
+                'text' => 'What is the value of the integral of 0?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 4,
+                'question_type_id' => 6, // Fill in the Blank
+                'text' => 'The derivative of sin(x) is ______.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 5,
+                'question_type_id' => 1, // MCQ
+                'text' => 'What is the unit of electric potential?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 5,
+                'question_type_id' => 3, // True/False
+                'text' => 'The speed of light is faster in water than in air.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 1,
+                'question_type_id' => 1, // MCQ
+                'text' => 'Which of the following is a statically typed language?',
+                'difficulty_level' => 'medium',
+                'marks' => 2,
+            ],
+            [
+                'subject_id' => 1,
+                'question_type_id' => 6, // Fill in the Blank
+                'text' => 'The process of converting source code into machine code is called ______.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 2,
+                'question_type_id' => 1, // MCQ
+                'text' => 'Which algorithm is used to find the shortest path in a weighted graph?',
+                'difficulty_level' => 'medium',
+                'marks' => 2,
+            ],
+            [
+                'subject_id' => 2,
+                'question_type_id' => 3, // True/False
+                'text' => 'A binary tree can have more than two children per node.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 3,
+                'question_type_id' => 1, // MCQ
+                'text' => 'Which SQL statement is used to modify the structure of a table?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 3,
+                'question_type_id' => 6, // Fill in the Blank
+                'text' => 'The ______ keyword is used to sort the result set in descending order.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 4,
+                'question_type_id' => 1, // MCQ
+                'text' => 'What is the value of the derivative of x^3?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 4,
+                'question_type_id' => 3, // True/False
+                'text' => 'The integral of a function can be negative.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 5,
+                'question_type_id' => 1, // MCQ
+                'text' => 'What is the unit of capacitance?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 5,
+                'question_type_id' => 6, // Fill in the Blank
+                'text' => 'The formula for Ohm\'s Law is ______.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 1,
+                'question_type_id' => 1, // MCQ
+                'text' => 'Which of the following is a scripting language?',
+                'difficulty_level' => 'medium',
+                'marks' => 2,
+            ],
+            [
+                'subject_id' => 1,
+                'question_type_id' => 3, // True/False
+                'text' => 'JavaScript is a case-sensitive language.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 2,
+                'question_type_id' => 1, // MCQ
+                'text' => 'Which sorting algorithm has a worst-case time complexity of O(n log n)?',
+                'difficulty_level' => 'medium',
+                'marks' => 2,
+            ],
+            [
+                'subject_id' => 2,
+                'question_type_id' => 6, // Fill in the Blank
+                'text' => 'The time complexity of selection sort is ______.',
+                'difficulty_level' => 'medium',
+                'marks' => 2,
+            ],
+            [
+                'subject_id' => 3,
+                'question_type_id' => 1, // MCQ
+                'text' => 'Which SQL statement is used to delete a database?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 3,
+                'question_type_id' => 3, // True/False
+                'text' => 'A foreign key can reference a non-primary key column.',
+                'difficulty_level' => 'medium',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 4,
+                'question_type_id' => 1, // MCQ
+                'text' => 'What is the value of the integral of 2x?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 4,
+                'question_type_id' => 6, // Fill in the Blank
+                'text' => 'The derivative of cos(x) is ______.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 5,
+                'question_type_id' => 1, // MCQ
+                'text' => 'What is the unit of magnetic flux?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 5,
+                'question_type_id' => 3, // True/False
+                'text' => 'The Earth\'s magnetic field is strongest at the equator.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 1,
+                'question_type_id' => 1, // MCQ
+                'text' => 'Which of the following is a markup language?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 1,
+                'question_type_id' => 6, // Fill in the Blank
+                'text' => 'The process of finding errors in code is called ______.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 2,
+                'question_type_id' => 1, // MCQ
+                'text' => 'Which data structure is used for implementing a FIFO system?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 2,
+                'question_type_id' => 3, // True/False
+                'text' => 'A binary search tree is always a balanced tree.',
+                'difficulty_level' => 'medium',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 3,
+                'question_type_id' => 1, // MCQ
+                'text' => 'Which SQL statement is used to add a new row to a table?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 3,
+                'question_type_id' => 6, // Fill in the Blank
+                'text' => 'The ______ keyword is used to filter rows in SQL.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 4,
+                'question_type_id' => 1, // MCQ
+                'text' => 'What is the value of the derivative of e^x?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 4,
+                'question_type_id' => 3, // True/False
+                'text' => 'The integral of a function is always positive.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 5,
+                'question_type_id' => 1, // MCQ
+                'text' => 'What is the unit of inductance?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 5,
+                'question_type_id' => 6, // Fill in the Blank
+                'text' => 'The formula for potential energy is ______.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 1,
+                'question_type_id' => 1, // MCQ
+                'text' => 'Which of the following is a compiled language?',
+                'difficulty_level' => 'medium',
+                'marks' => 2,
+            ],
+            [
+                'subject_id' => 1,
+                'question_type_id' => 3, // True/False
+                'text' => 'Java is platform-independent.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 2,
+                'question_type_id' => 1, // MCQ
+                'text' => 'Which algorithm is used to detect cycles in a graph?',
+                'difficulty_level' => 'medium',
+                'marks' => 2,
+            ],
+            [
+                'subject_id' => 2,
+                'question_type_id' => 6, // Fill in the Blank
+                'text' => 'The time complexity of bubble sort is ______.',
+                'difficulty_level' => 'medium',
+                'marks' => 2,
+            ],
+            [
+                'subject_id' => 3,
+                'question_type_id' => 1, // MCQ
+                'text' => 'Which SQL statement is used to change the data type of a column?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 3,
+                'question_type_id' => 3, // True/False
+                'text' => 'A unique key can have NULL values.',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            [
+                'subject_id' => 4,
+                'question_type_id' => 1, // MCQ
+                'text' => 'What is the value of the integral of x^2?',
+                'difficulty_level' => 'easy',
+                'marks' => 1,
+            ],
+            
         ];
 
         foreach ($questions as $question) {

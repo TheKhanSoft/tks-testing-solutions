@@ -16,6 +16,7 @@ return new class extends Migration
             $table->foreignId('question_id')->constrained('questions')->onDeleteCascade();
             $table->text('text');
             $table->boolean('is_correct')->default(false);
+            $table->integer('order')->default(0);
             $table->timestamps();
             $table->softDeletes();
 

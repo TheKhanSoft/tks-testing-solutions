@@ -4,67 +4,92 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes; // Added Soft Deletes
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Question extends Model
+class QuestionType extends Model
 {
-    use HasFactory, SoftDeletes; // Use SoftDeletes trait
+    use HasFactory, SoftDeletes;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<string>
+     */
     protected $fillable = [
-        'subject_id',
-        'question_type_id',
-        'question_text',
-        'correct_answer', // Store correct answer (could be text or option ID for MCQs)
-        'marks',
-        'difficulty_level', // Added difficulty_level
-        'hint',             // Added hint
-        'explanation',      // Added explanation
+        'name',
+        'description',
     ];
-    protected $dates = ['deleted_at']; // To enable soft deletes
 
-    // Relationships
-    public function subject()
+    /**
+     * Get the questions for this question type
+     */
+    public function questions(): HasMany
     {
-        return $this->belongsTo(Subject::class);
+        return $this->hasMany(Question::class);
     }
 
-    public function questionType()
+    /**
+     * Determine if this question type is multiple choice
+     */
+    public function isMultipleChoice(): bool
     {
-        return $this->belongsTo(QuestionType::class);
+        return $this->id === 1;
     }
 
-    public function paperQuestions()
+    /**
+     * Determine if this question type is multiple select
+     */
+    public function isMultipleSelect(): bool
     {
-        return $this->hasMany(PaperQuestion::class);
+        return $this->id === 2;
     }
 
-    public function options()
+    /**
+     * Determine if this question type is true/false
+     */
+    public function isTrueFalse(): bool
     {
-        return $this->hasMany(QuestionOption::class);
+        return $this->id === 3;
     }
 
-    public function answers()
+    /**
+     * Determine if this question type is short answer
+     */
+    public function isShortAnswer(): bool
     {
-        return $this->hasMany(Answer::class);
+        return $this->id === 4;
     }
 
-    // Scopes
-    public function scopeOfType($query, $questionTypeId)
+    /**
+     * Determine if this question type is essay
+     */
+    public function isEssay(): bool
     {
-        return $query->where('question_type_id', $questionTypeId);
+        return $this->id === 5;
     }
 
-    public function scopeOfSubject($query, $subjectId)
+    /**
+     * Determine if this question type is fill in the blank
+     */
+    public function isFillInTheBlank(): bool
     {
-        return $query->where('subject_id', $subjectId);
+        return $this->id === 6;
     }
 
-    public function scopeSearch($query, $searchTerm)
+    /**
+     * Scope a query to only include multiple choice questions
+     */
+    public function scopeMultipleChoice($query)
     {
-        return $query->where('question_text', 'like', "%{$searchTerm}%")
-                     ->orWhere('explanation', 'like', "%{$searchTerm}%");
+        return $query->where('id', 1);
     }
 
-    // Eager Loading
-    protected $with = ['questionType', 'subject']; // Eager load questionType and subject by default
+    /**
+     * Scope a query to only include multiple select questions
+     */
+    public function scopeMultipleSelect($query)
+    {
+        return $query->where('id', 2);
+    }
 }

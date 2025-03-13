@@ -7,28 +7,27 @@ use Illuminate\Database\Seeder;
 
 class PaperCategorySeeder extends Seeder
 {
+    /**
+     * Run the database seeds.
+     */
     public function run(): void
     {
         $categories = [
             [
-                'name' => 'GAT General',
-                'description' => 'Graduate Assessment Test for general subjects',
+                'name' => 'Programming',
+                'description' => 'Tests related to programming and software development',
             ],
             [
-                'name' => 'GAT Subject',
-                'description' => 'Graduate Assessment Test for specific subjects',
+                'name' => 'Mathematics',
+                'description' => 'Tests covering various mathematics topics',
             ],
             [
-                'name' => 'Entry Test',
-                'description' => 'University admission entry test',
+                'name' => 'Science',
+                'description' => 'Tests covering physics, chemistry and biology',
             ],
             [
-                'name' => 'Midterm Exam',
-                'description' => 'Mid-semester examination',
-            ],
-            [
-                'name' => 'Final Exam',
-                'description' => 'End-of-semester examination',
+                'name' => 'General Knowledge',
+                'description' => 'Tests covering general knowledge topics',
             ],
         ];
 

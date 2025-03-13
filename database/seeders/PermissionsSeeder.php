@@ -79,8 +79,8 @@ class PermissionsSeeder extends Seeder
         ]);
         
         // Assign user roles
-        User::where('email', 'admin@example.com')->first()->assignRole('admin');
-        User::where('email', 'ahsan@example.com')->first()->assignRole('faculty');
-        User::where('email', 'ayesha@example.com')->first()->assignRole('staff');
+        // User::where('email', 'admin@example.com')->first()->assignRole('admin');
+        // User::where('email', 'ahsan@example.com')->first()->assignRole('faculty');
+        // User::where('email', 'ayesha@example.com')->first()->assignRole('staff');
     }
 }

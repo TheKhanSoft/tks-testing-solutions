@@ -4,67 +4,133 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes; // Added Soft Deletes
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class TestAttempt extends Model
 {
-    use HasFactory, SoftDeletes; // Use SoftDeletes trait
+    use HasFactory, SoftDeletes;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<string>
+     */
     protected $fillable = [
-        'user_id',
+        'candidate_id',
         'paper_id',
         'start_time',
         'end_time',
         'score',
-        'status',         // e.g., 'pending', 'in_progress', 'completed'
-        'is_stopped',     // Added is_stopped for admin control
-        'browser_info',   // Added browser_info
-        'ip_address',     // Added ip_address
+        'status',
     ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
     protected $casts = [
         'start_time' => 'datetime',
         'end_time' => 'datetime',
-        'is_stopped' => 'boolean', // Cast is_stopped to boolean
+        'score' => 'integer',
     ];
-    protected $dates = ['deleted_at']; // To enable soft deletes
 
-    // Relationships
-    public function user()
+    /**
+     * Get the candidate who attempted the test
+     */
+    public function candidate(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Candidate::class);
     }
 
-    public function paper()
+    /**
+     * Get the paper that was attempted
+     */
+    public function paper(): BelongsTo
     {
         return $this->belongsTo(Paper::class);
     }
 
-    public function answers()
+    /**
+     * Get all candidate papers (answers) for this attempt
+     */
+    public function candidatePapers(): HasMany
     {
-        return $this->hasMany(Answer::class);
+        return $this->hasMany(CandidatePaper::class);
     }
 
-    // Scopes
-    public function scopeInProgress($query)
-    {
-        return $query->where('status', 'in_progress');
-    }
-
+    /**
+     * Scope a query to only include completed test attempts
+     */
     public function scopeCompleted($query)
     {
         return $query->where('status', 'completed');
     }
 
-    public function scopeForUser($query, $userId)
+    /**
+     * Scope a query to only include in-progress test attempts
+     */
+    public function scopeInProgress($query)
     {
-        return $query->where('user_id', $userId);
+        return $query->where('status', 'in_progress');
     }
 
-    public function scopeForPaper($query, $paperId)
+    /**
+     * Scope a query to only include pending test attempts
+     */
+    public function scopePending($query)
     {
-        return $query->where('paper_id', $paperId);
+        return $query->where('status', 'pending');
     }
 
-    // Eager Loading
-    protected $with = ['user', 'paper']; // Eager load user and paper by default
+    /**
+     * Check if the test attempt is completed
+     */
+    public function isCompleted(): bool
+    {
+        return $this->status === 'completed';
+    }
+
+    /**
+     * Check if the test attempt is in progress
+     */
+    public function isInProgress(): bool
+    {
+        return $this->status === 'in_progress';
+    }
+
+    /**
+     * Calculate time spent on this attempt in minutes
+     */
+    public function timeSpent()
+    {
+        if (!$this->start_time) {
+            return 0;
+        }
+
+        $end = $this->end_time ?? now();
+        return $this->start_time->diffInMinutes($end);
+    }
+
+    /**
+     * Calculate the percentage score
+     */
+    public function percentageScore()
+    {
+        if (!$this->score || !$this->paper->total_marks) {
+            return 0;
+        }
+
+        return ($this->score / $this->paper->total_marks) * 100;
+    }
+
+    /**
+     * Determine if the candidate passed
+     */
+    public function isPassed()
+    {
+        return $this->percentageScore() >= $this->paper->passing_percentage;
+    }
 }

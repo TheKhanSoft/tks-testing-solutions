@@ -33,14 +33,10 @@ class DatabaseSeeder extends Seeder
             QuestionSeeder::class,
             QuestionOptionSeeder::class,
             
-            // // Question tagging system
-            // TagSeeder::class,
-            // QuestionTagSeeder::class,
-            
             // Papers and categories
             PaperCategorySeeder::class,
-            PaperSubjectSeeder::class,
             PaperSeeder::class,
+            PaperSubjectSeeder::class,
             PaperQuestionSeeder::class,
 
             // Candidate and Paper

@@ -4,46 +4,96 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Subject extends Model
 {
-    use HasFactory, SoftDeletes; // Use SoftDeletes trait
+    use HasFactory, SoftDeletes;
 
-    protected $fillable = ['name', 'description', 'department_id']; // department_id might be managed via pivot
-    protected $dates = ['deleted_at']; // To enable soft deletes
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<string>
+     */
+    protected $fillable = [
+        'name',
+        'code',
+        'description',
+    ];
 
-    // Relationships
-    public function departments()
-    {
-        return $this->belongsToMany(Department::class, 'department_subject');
-    }
-
-    public function facultyMembers()
-    {
-        return $this->belongsToMany(FacultyMember::class, 'subject_faculty');
-    }
-
-    public function questions()
+    /**
+     * Get the questions for this subject
+     */
+    public function questions(): HasMany
     {
         return $this->hasMany(Question::class);
     }
 
-    public function papers()
+    /**
+     * Get the easy questions for this subject
+     */
+    public function easyQuestions()
     {
-        return $this->hasMany(Paper::class);
+        return $this->questions()->where('difficulty_level', 'easy');
     }
 
-    // Scopes
-    public function scopeSearch($query, $searchTerm)
+    /**
+     * Get the medium questions for this subject
+     */
+    public function mediumQuestions()
     {
-        return $query->where('name', 'like', "%{$searchTerm}%")
-                     ->orWhere('description', 'like', "%{$searchTerm}%");
+        return $this->questions()->where('difficulty_level', 'medium');
     }
 
-    public function scopeForDepartment($query, $departmentId)
+    /**
+     * Get the hard questions for this subject
+     */
+    public function hardQuestions()
     {
-        return $query->whereHas('departments', function ($q) use ($departmentId) {
-            $q->where('department_id', $departmentId);
-        });
+        return $this->questions()->where('difficulty_level', 'hard');
+    }
+
+    /**
+     * Get questions by type
+     */
+    public function questionsByType($typeId)
+    {
+        return $this->questions()->where('question_type_id', $typeId);
+    }
+
+    /**
+     * Get MCQ questions for this subject
+     */
+    public function mcqQuestions()
+    {
+        return $this->questionsByType(1);
+    }
+
+    /**
+     * Get the active questions for this subject
+     */
+    public function activeQuestions()
+    {
+        return $this->questions()->where('status', 'active');
+    }
+
+    /**
+     * Get the paper subjects entries for this subject
+     */
+    public function paperSubjects(): HasMany
+    {
+        return $this->hasMany(PaperSubject::class);
+    }
+
+    /**
+     * Get all papers that include this subject
+     */
+    public function papers(): BelongsToMany
+    {
+        return $this->belongsToMany(Paper::class, 'paper_subjects')
+                    ->withPivot(['percentage', 'number_of_questions', 'difficulty_distribution'])
+                    ->withTimestamps();
     }
 }

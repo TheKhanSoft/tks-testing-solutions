@@ -7,5 +7,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class DepartmentSubject extends Model
 {
+    use SoftDeletes;
     //
 }

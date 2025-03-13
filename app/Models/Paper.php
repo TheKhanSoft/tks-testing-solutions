@@ -4,82 +4,140 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes; // Added Soft Deletes
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Paper extends Model
 {
-    use HasFactory, SoftDeletes; // Use SoftDeletes trait
+    use HasFactory, SoftDeletes;
 
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<string>
+     */
     protected $fillable = [
-        'subject_id',
         'paper_category_id',
-        'name',
+        'title',
         'description',
-        'duration_minutes',
         'total_marks',
-        'instructions', // Added instructions
-        'is_published',  // Added is_published status
+        'passing_marks',
+        'duration_minutes',
+        'settings',
+        'shuffle_questions',
+        'shuffle_options',
+        'show_results_immediately',
+        'passing_percentage',
+        'status',
     ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
     protected $casts = [
-        'is_published' => 'boolean', // Cast is_published to boolean
+        'total_marks' => 'integer',
+        'passing_marks' => 'integer',
+        'duration_minutes' => 'integer',
+        'settings' => 'json',
+        'shuffle_questions' => 'boolean',
+        'shuffle_options' => 'boolean',
+        'show_results_immediately' => 'boolean',
+        'passing_percentage' => 'integer',
     ];
-    protected $dates = ['deleted_at']; // To enable soft deletes
 
-    // Relationships
-    public function subject()
+    /**
+     * Get the category of the paper
+     */
+    public function category(): BelongsTo
     {
-        return $this->belongsTo(Subject::class);
+        return $this->belongsTo(PaperCategory::class, 'paper_category_id');
     }
 
-    public function paperCategory()
+    /**
+     * Get the questions in this paper
+     */
+    public function questions(): BelongsToMany
     {
-        return $this->belongsTo(PaperCategory::class);
+        return $this->belongsToMany(Question::class, 'paper_questions')
+                    ->withPivot('order_index')
+                    ->withTimestamps();
     }
 
-    public function questions()
-    {
-        return $this->belongsToMany(Question::class, 'paper_question')->withPivot('order_index'); // Order index for shuffled order
-    }
-
-    public function userCategories()
-    {
-        return $this->belongsToMany(UserCategory::class, 'paper_user_category');
-    }
-
-    public function testAttempts()
+    /**
+     * Get the test attempts for this paper
+     */
+    public function testAttempts(): HasMany
     {
         return $this->hasMany(TestAttempt::class);
     }
 
-    // Scopes
+    /**
+     * Get the subjects for this paper
+     */
+    public function paperSubjects(): HasMany
+    {
+        return $this->hasMany(PaperSubject::class);
+    }
+
+    /**
+     * Get all subjects for this paper through paper_subjects
+     */
+    public function subjects(): BelongsToMany
+    {
+        return $this->belongsToMany(Subject::class, 'paper_subjects')
+                    ->withPivot(['percentage', 'number_of_questions', 'difficulty_distribution'])
+                    ->withTimestamps();
+    }
+
+    /**
+     * Scope a query to only include published papers
+     */
     public function scopePublished($query)
     {
-        return $query->where('is_published', true);
+        return $query->where('status', 'published');
     }
 
-    public function scopeOfCategory($query, $paperCategoryId)
+    /**
+     * Scope a query to only include draft papers
+     */
+    public function scopeDraft($query)
     {
-        return $query->where('paper_category_id', $paperCategoryId);
+        return $query->where('status', 'draft');
     }
 
-    public function scopeOfSubject($query, $subjectId)
+    /**
+     * Scope a query to only include archived papers
+     */
+    public function scopeArchived($query)
     {
-        return $query->where('subject_id', $subjectId);
+        return $query->where('status', 'archived');
     }
 
-
-    public function scopeSearch($query, $searchTerm)
+    /**
+     * Determine if the paper is published
+     */
+    public function isPublished(): bool
     {
-        return $query->where('name', 'like', "%{$searchTerm}%")
-                     ->orWhere('description', 'like', "%{$searchTerm}%")
-                     ->orWhereHas('subject', function ($q) use ($searchTerm) {
-                         $q->where('name', 'like', "%{$searchTerm}%");
-                     })
-                     ->orWhereHas('paperCategory', function ($q) use ($searchTerm) {
-                         $q->where('name', 'like', "%{$searchTerm}%");
-                     });
+        return $this->status === 'published';
     }
 
-    // Eager Loading
-    protected $with = ['subject', 'paperCategory']; // Eager load subject and paperCategory by default
+    /**
+     * Calculate the maximum possible score for this paper
+     */
+    public function calculateMaxScore(): int
+    {
+        return $this->total_marks;
+    }
+
+    /**
+     * Check if a candidate passed the paper
+     */
+    public function isPassed($score): bool
+    {
+        return $score >= $this->passing_marks;
+    }
 }

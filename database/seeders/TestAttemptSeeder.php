@@ -13,7 +13,7 @@ class TestAttemptSeeder extends Seeder
         $testAttempts = [
             // Usman's test attempts
             [
-                'candiate_id' => 1, // Usman Ali
+                'candidate_id' => 1, // Usman Ali
                 'paper_id' => 1, // Computer Science Entry Test
                 'start_time' => Carbon::now()->subDays(5)->setHour(10)->setMinute(0),
                 'end_time' => Carbon::now()->subDays(5)->setHour(12)->setMinute(0),
@@ -21,7 +21,7 @@ class TestAttemptSeeder extends Seeder
                 'status' => 'completed',
             ],
             [
-                'candiate_id' => 1, // Usman Ali 
+                'candidate_id' => 1, // Usman Ali 
                 'paper_id' => 2, // GAT General
                 'start_time' => Carbon::now()->subDays(2)->setHour(9)->setMinute(0),
                 'end_time' => Carbon::now()->subDays(2)->setHour(12)->setMinute(0),
@@ -31,7 +31,7 @@ class TestAttemptSeeder extends Seeder
             
             // Aisha's test attempts
             [
-                'candiate_id' => 2, // Aisha Bibi
+                'candidate_id' => 2, // Aisha Bibi
                 'paper_id' => 1, // Computer Science Entry Test
                 'start_time' => Carbon::now()->subDays(4)->setHour(14)->setMinute(0),
                 'end_time' => Carbon::now()->subDays(4)->setHour(16)->setMinute(0),
@@ -41,7 +41,7 @@ class TestAttemptSeeder extends Seeder
             
             // Mohammad Bilal's test attempts
             [
-                'candiate_id' => 3, // Mohammad Bilal
+                'candidate_id' => 3, // Mohammad Bilal
                 'paper_id' => 3, // Programming Midterm
                 'start_time' => Carbon::now()->subDays(3)->setHour(11)->setMinute(0),
                 'end_time' => Carbon::now()->subDays(3)->setHour(12)->setMinute(30),
@@ -51,7 +51,7 @@ class TestAttemptSeeder extends Seeder
             
             // Fatima's test attempts
             [
-                'candiate_id' => 4, // Fatima Zahra
+                'candidate_id' => 4, // Fatima Zahra
                 'paper_id' => 2, // GAT General
                 'start_time' => Carbon::now()->subDay(1)->setHour(9)->setMinute(0),
                 'end_time' => Carbon::now()->subDay(1)->setHour(12)->setMinute(0),
@@ -61,7 +61,7 @@ class TestAttemptSeeder extends Seeder
             
             // Hamza's test attempts
             [
-                'candiate_id' => 5, // Hamza Khan
+                'candidate_id' => 5, // Hamza Khan
                 'paper_id' => 1, // Computer Science Entry Test
                 'start_time' => Carbon::now()->subHours(5),
                 'end_time' => Carbon::now()->subHours(3),
@@ -71,7 +71,7 @@ class TestAttemptSeeder extends Seeder
             
             // Sadia's test attempts - Still in progress
             [
-                'candiate_id' => 6, // Sadia Malik
+                'candidate_id' => 6, // Sadia Malik
                 'paper_id' => 3, // Programming Midterm
                 'start_time' => Carbon::now()->subMinutes(30),
                 'end_time' => null,
