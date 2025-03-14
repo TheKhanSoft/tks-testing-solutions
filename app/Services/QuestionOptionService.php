@@ -6,8 +6,16 @@ use App\Models\QuestionOption;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Contracts\Pagination\Paginator;
 
-class QuestionOptionService
+class QuestionOptionService extends BaseService
 {
+    /**
+     * QuestionOptionService constructor.
+     */
+    public function __construct()
+    {
+        $this->modelClass = QuestionOption::class;
+    }
+    
     /**
      * Get all question options.
      *
@@ -17,7 +25,7 @@ class QuestionOptionService
      */
     public function getAllQuestionOptions(array $columns = ['*'], array $relations = []): Collection
     {
-        return QuestionOption::with($relations)->get($columns);
+        return $this->getAll($columns, $relations);
     }
 
     /**
@@ -30,7 +38,7 @@ class QuestionOptionService
      */
     public function getPaginatedQuestionOptions(int $perPage = 10, array $columns = ['*'], array $relations = []): Paginator
     {
-        return QuestionOption::with($relations)->paginate($perPage, $columns);
+        return $this->getPaginated($perPage, $columns, $relations);
     }
 
     /**
@@ -43,7 +51,7 @@ class QuestionOptionService
      */
     public function getQuestionOptionById(int $id, array $columns = ['*'], array $relations = []): ?QuestionOption
     {
-        return QuestionOption::with($relations)->find($id, $columns);
+        return $this->getById($id, $columns, $relations);
     }
 
     /**
@@ -56,7 +64,7 @@ class QuestionOptionService
      */
     public function getQuestionOptionByIdOrFail(int $id, array $columns = ['*'], array $relations = []): QuestionOption
     {
-        return QuestionOption::with($relations)->findOrFail($id, $columns);
+        return $this->getByIdOrFail($id, $columns, $relations);
     }
 
     /**
@@ -67,7 +75,7 @@ class QuestionOptionService
      */
     public function createQuestionOption(array $data): QuestionOption
     {
-        return QuestionOption::create($data);
+        return $this->create($data);
     }
 
     /**
@@ -79,8 +87,7 @@ class QuestionOptionService
      */
     public function updateQuestionOption(QuestionOption $questionOption, array $data): QuestionOption
     {
-        $questionOption->update($data);
-        return $questionOption;
+        return $this->update($questionOption, $data);
     }
 
     /**
@@ -91,7 +98,7 @@ class QuestionOptionService
      */
     public function deleteQuestionOption(QuestionOption $questionOption): ?bool
     {
-        return $questionOption->delete();
+        return $this->delete($questionOption);
     }
 
     /**
@@ -102,7 +109,7 @@ class QuestionOptionService
      */
     public function restoreQuestionOption(int $id): bool
     {
-        return QuestionOption::withTrashed()->findOrFail($id)->restore();
+        return $this->restore($id);
     }
 
     /**
@@ -113,7 +120,7 @@ class QuestionOptionService
      */
     public function forceDeleteQuestionOption(int $id): ?bool
     {
-        return QuestionOption::withTrashed()->findOrFail($id)->forceDelete();
+        return $this->forceDelete($id);
     }
 
     /**
@@ -127,9 +134,11 @@ class QuestionOptionService
     public function getCorrectQuestionOptions(int $perPage = 10, array $columns = ['*'], array $relations = []): Paginator|Collection
     {
         $query = QuestionOption::correct()->with($relations);
+        
         if ($perPage) {
             return $query->paginate($perPage, $columns);
         }
+        
         return $query->get($columns);
     }
 
@@ -145,9 +154,11 @@ class QuestionOptionService
     public function getQuestionOptionsByQuestion(int $questionId, ?int $perPage = 10, array $columns = ['*'], array $relations = []): Paginator|Collection
     {
         $query = QuestionOption::where('question_id', $questionId)->with($relations);
+        
         if ($perPage) {
             return $query->paginate($perPage, $columns);
         }
+        
         return $query->get($columns);
     }
 
@@ -156,20 +167,45 @@ class QuestionOptionService
      *
      * @param int|null $perPage
      * @param array $columns
-     * @param array $questionRelations Relations for questions if eager loading is needed for them as well
+     * @param array $questionRelations
      * @return Paginator<QuestionOption>|Collection<int, QuestionOption>
      */
     public function getQuestionOptionsWithQuestions(int $perPage = 10, array $columns = ['*'], array $questionRelations = []): Paginator|Collection
     {
-        $query = QuestionOption::with(['question' => function ($query) use ($questionRelations) {
-            if (!empty($questionRelations)) {
-                $query->with($questionRelations);
-            }
-        }]);
+        return $this->getWithNestedRelations('question', $questionRelations, $perPage, $columns);
+    }
 
-        if ($perPage) {
-            return $query->paginate($perPage, $columns);
+    /**
+     * Create multiple question options at once.
+     *
+     * @param int $questionId
+     * @param array $optionsData
+     * @return Collection<int, QuestionOption>
+     */
+    public function createMultipleOptions(int $questionId, array $optionsData): Collection
+    {
+        $options = collect();
+        
+        foreach ($optionsData as $optionData) {
+            $optionData['question_id'] = $questionId;
+            $options->push($this->createQuestionOption($optionData));
         }
-        return $query->get($columns);
+        
+        return $options;
+    }
+
+    /**
+     * Get option selected in an answer.
+     *
+     * @param int $answerId
+     * @param array $columns
+     * @param array $relations
+     * @return Collection<int, QuestionOption>
+     */
+    public function getOptionsForAnswer(int $answerId, array $columns = ['*'], array $relations = []): Collection
+    {
+        return QuestionOption::whereHas('answers', function($query) use ($answerId) {
+            $query->where('answer_id', $answerId);
+        })->with($relations)->get($columns);
     }
 }

@@ -6,8 +6,16 @@ use App\Models\Paper;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Contracts\Pagination\Paginator;
 
-class PaperService
+class PaperService extends BaseService
 {
+    /**
+     * PaperService constructor.
+     */
+    public function __construct()
+    {
+        $this->modelClass = Paper::class;
+    }
+    
     /**
      * Get all papers.
      *
@@ -17,7 +25,7 @@ class PaperService
      */
     public function getAllPapers(array $columns = ['*'], array $relations = []): Collection
     {
-        return Paper::with($relations)->get($columns);
+        return $this->getAll($columns, $relations);
     }
 
     /**
@@ -30,7 +38,7 @@ class PaperService
      */
     public function getPaginatedPapers(int $perPage = 10, array $columns = ['*'], array $relations = []): Paginator
     {
-        return Paper::with($relations)->paginate($perPage, $columns);
+        return $this->getPaginated($perPage, $columns, $relations);
     }
 
     /**
@@ -43,7 +51,7 @@ class PaperService
      */
     public function getPaperById(int $id, array $columns = ['*'], array $relations = []): ?Paper
     {
-        return Paper::with($relations)->find($id, $columns);
+        return $this->getById($id, $columns, $relations);
     }
 
     /**
@@ -56,7 +64,7 @@ class PaperService
      */
     public function getPaperByIdOrFail(int $id, array $columns = ['*'], array $relations = []): Paper
     {
-        return Paper::with($relations)->findOrFail($id, $columns);
+        return $this->getByIdOrFail($id, $columns, $relations);
     }
 
     /**
@@ -67,7 +75,7 @@ class PaperService
      */
     public function createPaper(array $data): Paper
     {
-        return Paper::create($data);
+        return $this->create($data);
     }
 
     /**
@@ -79,8 +87,7 @@ class PaperService
      */
     public function updatePaper(Paper $paper, array $data): Paper
     {
-        $paper->update($data);
-        return $paper;
+        return $this->update($paper, $data);
     }
 
     /**
@@ -91,7 +98,7 @@ class PaperService
      */
     public function deletePaper(Paper $paper): ?bool
     {
-        return $paper->delete();
+        return $this->delete($paper);
     }
 
     /**
@@ -102,7 +109,7 @@ class PaperService
      */
     public function restorePaper(int $id): bool
     {
-        return Paper::withTrashed()->findOrFail($id)->restore();
+        return $this->restore($id);
     }
 
     /**
@@ -113,7 +120,7 @@ class PaperService
      */
     public function forceDeletePaper(int $id): ?bool
     {
-        return Paper::withTrashed()->findOrFail($id)->forceDelete();
+        return $this->forceDelete($id);
     }
 
     /**
@@ -127,11 +134,7 @@ class PaperService
      */
     public function searchPapers(string $searchTerm, ?int $perPage = 10, array $columns = ['*'], array $relations = []): Paginator|Collection
     {
-        $query = Paper::search($searchTerm)->with($relations);
-        if ($perPage) {
-            return $query->paginate($perPage, $columns);
-        }
-        return $query->get($columns);
+        return $this->search($searchTerm, $perPage, $columns, $relations);
     }
 
     /**
@@ -145,9 +148,11 @@ class PaperService
     public function getPublishedPapers(int $perPage = 10, array $columns = ['*'], array $relations = []): Paginator|Collection
     {
         $query = Paper::published()->with($relations);
+        
         if ($perPage) {
             return $query->paginate($perPage, $columns);
         }
+        
         return $query->get($columns);
     }
 
@@ -163,9 +168,11 @@ class PaperService
     public function getPapersByCategory(int $paperCategoryId, ?int $perPage = 10, array $columns = ['*'], array $relations = []): Paginator|Collection
     {
         $query = Paper::ofCategory($paperCategoryId)->with($relations);
+        
         if ($perPage) {
             return $query->paginate($perPage, $columns);
         }
+        
         return $query->get($columns);
     }
 
@@ -181,9 +188,11 @@ class PaperService
     public function getPapersBySubject(int $subjectId, ?int $perPage = 10, array $columns = ['*'], array $relations = []): Paginator|Collection
     {
         $query = Paper::ofSubject($subjectId)->with($relations);
+        
         if ($perPage) {
             return $query->paginate($perPage, $columns);
         }
+        
         return $query->get($columns);
     }
 
@@ -192,21 +201,12 @@ class PaperService
      *
      * @param int|null $perPage
      * @param array $columns
-     * @param array $subjectRelations Relations for subjects if eager loading is needed for them as well
+     * @param array $subjectRelations
      * @return Paginator<Paper>|Collection<int, Paper>
      */
     public function getPapersWithSubject(int $perPage = 10, array $columns = ['*'], array $subjectRelations = []): Paginator|Collection
     {
-        $query = Paper::with(['subject' => function ($query) use ($subjectRelations) {
-            if (!empty($subjectRelations)) {
-                $query->with($subjectRelations);
-            }
-        }]);
-
-        if ($perPage) {
-            return $query->paginate($perPage, $columns);
-        }
-        return $query->get($columns);
+        return $this->getWithNestedRelations('subject', $subjectRelations, $perPage, $columns);
     }
 
     /**
@@ -214,21 +214,12 @@ class PaperService
      *
      * @param int|null $perPage
      * @param array $columns
-     * @param array $paperCategoryRelations Relations for paper categories if eager loading is needed for them as well
+     * @param array $paperCategoryRelations
      * @return Paginator<Paper>|Collection<int, Paper>
      */
     public function getPapersWithPaperCategory(int $perPage = 10, array $columns = ['*'], array $paperCategoryRelations = []): Paginator|Collection
     {
-        $query = Paper::with(['paperCategory' => function ($query) use ($paperCategoryRelations) {
-            if (!empty($paperCategoryRelations)) {
-                $query->with($paperCategoryRelations);
-            }
-        }]);
-
-        if ($perPage) {
-            return $query->paginate($perPage, $columns);
-        }
-        return $query->get($columns);
+        return $this->getWithNestedRelations('paperCategory', $paperCategoryRelations, $perPage, $columns);
     }
 
     /**
@@ -236,21 +227,12 @@ class PaperService
      *
      * @param int|null $perPage
      * @param array $columns
-     * @param array $questionRelations Relations for questions if eager loading is needed for them as well
+     * @param array $questionRelations
      * @return Paginator<Paper>|Collection<int, Paper>
      */
     public function getPapersWithQuestions(int $perPage = 10, array $columns = ['*'], array $questionRelations = []): Paginator|Collection
     {
-        $query = Paper::with(['questions' => function ($query) use ($questionRelations) {
-            if (!empty($questionRelations)) {
-                $query->with($questionRelations);
-            }
-        }]);
-
-        if ($perPage) {
-            return $query->paginate($perPage, $columns);
-        }
-        return $query->get($columns);
+        return $this->getWithNestedRelations('questions', $questionRelations, $perPage, $columns);
     }
 
     /**
@@ -258,21 +240,12 @@ class PaperService
      *
      * @param int|null $perPage
      * @param array $columns
-     * @param array $userCategoryRelations Relations for user categories if eager loading is needed for them as well
+     * @param array $userCategoryRelations
      * @return Paginator<Paper>|Collection<int, Paper>
      */
     public function getPapersWithUserCategories(int $perPage = 10, array $columns = ['*'], array $userCategoryRelations = []): Paginator|Collection
     {
-        $query = Paper::with(['userCategories' => function ($query) use ($userCategoryRelations) {
-            if (!empty($userCategoryRelations)) {
-                $query->with($userCategoryRelations);
-            }
-        }]);
-
-        if ($perPage) {
-            return $query->paginate($perPage, $columns);
-        }
-        return $query->get($columns);
+        return $this->getWithNestedRelations('userCategories', $userCategoryRelations, $perPage, $columns);
     }
 
     /**
@@ -280,21 +253,12 @@ class PaperService
      *
      * @param int|null $perPage
      * @param array $columns
-     * @param array $testAttemptRelations Relations for test attempts if eager loading is needed for them as well
+     * @param array $testAttemptRelations
      * @return Paginator<Paper>|Collection<int, Paper>
      */
     public function getPapersWithTestAttempts(int $perPage = 10, array $columns = ['*'], array $testAttemptRelations = []): Paginator|Collection
     {
-        $query = Paper::with(['testAttempts' => function ($query) use ($testAttemptRelations) {
-            if (!empty($testAttemptRelations)) {
-                $query->with($testAttemptRelations);
-            }
-        }]);
-
-        if ($perPage) {
-            return $query->paginate($perPage, $columns);
-        }
-        return $query->get($columns);
+        return $this->getWithNestedRelations('testAttempts', $testAttemptRelations, $perPage, $columns);
     }
 
     /**
@@ -344,5 +308,45 @@ class PaperService
     public function removeUserCategoryFromPaper(Paper $paper, int $userCategoryId): void
     {
         $paper->userCategories()->detach($userCategoryId);
+    }
+
+    /**
+     * Get papers by difficulty level.
+     *
+     * @param int $difficultyLevel
+     * @param int|null $perPage
+     * @param array $columns
+     * @param array $relations
+     * @return Paginator<Paper>|Collection<int, Paper>
+     */
+    public function getPapersByDifficultyLevel(int $difficultyLevel, ?int $perPage = 10, array $columns = ['*'], array $relations = []): Paginator|Collection
+    {
+        $query = Paper::where('difficulty_level', $difficultyLevel)->with($relations);
+        
+        if ($perPage) {
+            return $query->paginate($perPage, $columns);
+        }
+        
+        return $query->get($columns);
+    }
+
+    /**
+     * Get papers available for a specific user.
+     *
+     * @param int $userId
+     * @param int|null $perPage
+     * @param array $columns
+     * @param array $relations
+     * @return Paginator<Paper>|Collection<int, Paper>
+     */
+    public function getAvailablePapersForUser(int $userId, ?int $perPage = 10, array $columns = ['*'], array $relations = []): Paginator|Collection
+    {
+        $query = Paper::availableForUser($userId)->with($relations);
+        
+        if ($perPage) {
+            return $query->paginate($perPage, $columns);
+        }
+        
+        return $query->get($columns);
     }
 }

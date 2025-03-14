@@ -5,7 +5,8 @@ namespace App\Http\Controllers;
 use App\Http\Requests\FacultyMemberFormRequest;
 use App\Services\FacultyMemberService;
 use App\Models\FacultyMember;
-use App\Models\Department; // Import Department model
+use App\Models\Department;
+use App\Models\Subject;
 use Illuminate\Http\Request;
 
 class FacultyMemberController extends Controller
@@ -15,17 +16,25 @@ class FacultyMemberController extends Controller
     public function __construct(FacultyMemberService $facultyMemberService)
     {
         $this->facultyMemberService = $facultyMemberService;
+        $this->middleware('permission:view-faculty-members')->only(['index', 'show', 'search']);
+        $this->middleware('permission:create-faculty-members')->only(['create', 'store']);
+        $this->middleware('permission:edit-faculty-members')->only(['edit', 'update']);
+        $this->middleware('permission:delete-faculty-members')->only('destroy');
     }
 
     /**
      * Display a listing of faculty members.
      *
+     * @param Request $request
      * @return \Illuminate\View\View
      */
-    public function index()
+    public function index(Request $request)
     {
-        $facultyMembers = $this->facultyMemberService->getPaginatedFacultyMembers();
-        return view('faculty_members.index', compact('facultyMembers')); // Assuming you have a faculty_members.index view
+        $filters = $request->only(['department_id']);
+        $facultyMembers = $this->facultyMemberService->getPaginatedFacultyMembers($filters);
+        $departments = Department::all();
+        
+        return view('faculty_members.index', compact('facultyMembers', 'departments', 'filters'));
     }
 
     /**
@@ -35,8 +44,8 @@ class FacultyMemberController extends Controller
      */
     public function create()
     {
-        $departments = Department::all(); // Fetch departments for dropdown
-        return view('faculty_members.create', compact('departments')); // Assuming you have a faculty_members.create view
+        $departments = Department::all();
+        return view('faculty_members.create', compact('departments'));
     }
 
     /**
@@ -48,9 +57,16 @@ class FacultyMemberController extends Controller
     public function store(FacultyMemberFormRequest $request)
     {
         $validatedData = $request->validated();
-        $this->facultyMemberService->createFacultyMember($validatedData);
-
-        return redirect()->route('faculty-members.index')->with('success', 'Faculty Member created successfully!');
+        
+        try {
+            $this->facultyMemberService->createFacultyMember($validatedData);
+            return redirect()->route('faculty-members.index')
+                ->with('success', 'Faculty Member created successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Error creating faculty member: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -61,7 +77,9 @@ class FacultyMemberController extends Controller
      */
     public function show(FacultyMember $facultyMember)
     {
-        return view('faculty_members.show', compact('facultyMember')); // Assuming you have a faculty_members.show view
+        // Eager load related models to prevent N+1 query problem
+        $facultyMember->load(['department', 'subjects']);
+        return view('faculty_members.show', compact('facultyMember'));
     }
 
     /**
@@ -72,8 +90,8 @@ class FacultyMemberController extends Controller
      */
     public function edit(FacultyMember $facultyMember)
     {
-        $departments = Department::all(); // Fetch departments for dropdown
-        return view('faculty_members.edit', compact('facultyMember', 'departments')); // Assuming you have a faculty_members.edit view
+        $departments = Department::all();
+        return view('faculty_members.edit', compact('facultyMember', 'departments'));
     }
 
     /**
@@ -86,9 +104,16 @@ class FacultyMemberController extends Controller
     public function update(FacultyMemberFormRequest $request, FacultyMember $facultyMember)
     {
         $validatedData = $request->validated();
-        $this->facultyMemberService->updateFacultyMember($facultyMember, $validatedData);
-
-        return redirect()->route('faculty-members.index')->with('success', 'Faculty Member updated successfully!');
+        
+        try {
+            $this->facultyMemberService->updateFacultyMember($facultyMember, $validatedData);
+            return redirect()->route('faculty-members.index')
+                ->with('success', 'Faculty Member updated successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Error updating faculty member: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -99,9 +124,14 @@ class FacultyMemberController extends Controller
      */
     public function destroy(FacultyMember $facultyMember)
     {
-        $this->facultyMemberService->deleteFacultyMember($facultyMember);
-
-        return redirect()->route('faculty-members.index')->with('success', 'Faculty Member deleted successfully!');
+        try {
+            $this->facultyMemberService->deleteFacultyMember($facultyMember);
+            return redirect()->route('faculty-members.index')
+                ->with('success', 'Faculty Member deleted successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Error deleting faculty member: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -114,6 +144,22 @@ class FacultyMemberController extends Controller
     {
         $searchTerm = $request->input('search');
         $facultyMembers = $this->facultyMemberService->searchFacultyMembers($searchTerm);
-        return view('faculty_members.index', compact('facultyMembers', 'searchTerm')); // Reusing index view, passing searchTerm
+        $departments = Department::all();
+        
+        return view('faculty_members.index', compact('facultyMembers', 'searchTerm', 'departments'));
+    }
+    
+    /**
+     * Show form to assign subjects to a faculty member.
+     *
+     * @param  FacultyMember  $facultyMember
+     * @return \Illuminate\View\View
+     */
+    public function assignSubjects(FacultyMember $facultyMember)
+    {
+        $assignedSubjects = $facultyMember->subjects->pluck('id')->toArray();
+        $availableSubjects = Subject::whereNotIn('id', $assignedSubjects)->get();
+        
+        return view('faculty_members.assign_subjects', compact('facultyMember', 'availableSubjects', 'assignedSubjects'));
     }
 }

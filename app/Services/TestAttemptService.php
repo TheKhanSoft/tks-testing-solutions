@@ -6,8 +6,16 @@ use App\Models\TestAttempt;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Contracts\Pagination\Paginator;
 
-class TestAttemptService
+class TestAttemptService extends BaseService
 {
+    /**
+     * TestAttemptService constructor.
+     */
+    public function __construct()
+    {
+        $this->modelClass = TestAttempt::class;
+    }
+    
     /**
      * Get all test attempts.
      *
@@ -17,7 +25,7 @@ class TestAttemptService
      */
     public function getAllTestAttempts(array $columns = ['*'], array $relations = []): Collection
     {
-        return TestAttempt::with($relations)->get($columns);
+        return $this->getAll($columns, $relations);
     }
 
     /**
@@ -30,7 +38,7 @@ class TestAttemptService
      */
     public function getPaginatedTestAttempts(int $perPage = 10, array $columns = ['*'], array $relations = []): Paginator
     {
-        return TestAttempt::with($relations)->paginate($perPage, $columns);
+        return $this->getPaginated($perPage, $columns, $relations);
     }
 
     /**
@@ -43,7 +51,7 @@ class TestAttemptService
      */
     public function getTestAttemptById(int $id, array $columns = ['*'], array $relations = []): ?TestAttempt
     {
-        return TestAttempt::with($relations)->find($id, $columns);
+        return $this->getById($id, $columns, $relations);
     }
 
     /**
@@ -56,7 +64,7 @@ class TestAttemptService
      */
     public function getTestAttemptByIdOrFail(int $id, array $columns = ['*'], array $relations = []): TestAttempt
     {
-        return TestAttempt::with($relations)->findOrFail($id, $columns);
+        return $this->getByIdOrFail($id, $columns, $relations);
     }
 
     /**
@@ -67,7 +75,7 @@ class TestAttemptService
      */
     public function createTestAttempt(array $data): TestAttempt
     {
-        return TestAttempt::create($data);
+        return $this->create($data);
     }
 
     /**
@@ -79,8 +87,7 @@ class TestAttemptService
      */
     public function updateTestAttempt(TestAttempt $testAttempt, array $data): TestAttempt
     {
-        $testAttempt->update($data);
-        return $testAttempt;
+        return $this->update($testAttempt, $data);
     }
 
     /**
@@ -91,7 +98,7 @@ class TestAttemptService
      */
     public function deleteTestAttempt(TestAttempt $testAttempt): ?bool
     {
-        return $testAttempt->delete();
+        return $this->delete($testAttempt);
     }
 
     /**
@@ -102,7 +109,7 @@ class TestAttemptService
      */
     public function restoreTestAttempt(int $id): bool
     {
-        return TestAttempt::withTrashed()->findOrFail($id)->restore();
+        return $this->restore($id);
     }
 
     /**
@@ -113,7 +120,7 @@ class TestAttemptService
      */
     public function forceDeleteTestAttempt(int $id): ?bool
     {
-        return TestAttempt::withTrashed()->findOrFail($id)->forceDelete();
+        return $this->forceDelete($id);
     }
 
     /**
@@ -127,9 +134,11 @@ class TestAttemptService
     public function getInProgressTestAttempts(int $perPage = 10, array $columns = ['*'], array $relations = []): Paginator|Collection
     {
         $query = TestAttempt::inProgress()->with($relations);
+        
         if ($perPage) {
             return $query->paginate($perPage, $columns);
         }
+        
         return $query->get($columns);
     }
 
@@ -144,9 +153,11 @@ class TestAttemptService
     public function getCompletedTestAttempts(int $perPage = 10, array $columns = ['*'], array $relations = []): Paginator|Collection
     {
         $query = TestAttempt::completed()->with($relations);
+        
         if ($perPage) {
             return $query->paginate($perPage, $columns);
         }
+        
         return $query->get($columns);
     }
 
@@ -162,9 +173,11 @@ class TestAttemptService
     public function getTestAttemptsByUser(int $userId, ?int $perPage = 10, array $columns = ['*'], array $relations = []): Paginator|Collection
     {
         $query = TestAttempt::forUser($userId)->with($relations);
+        
         if ($perPage) {
             return $query->paginate($perPage, $columns);
         }
+        
         return $query->get($columns);
     }
 
@@ -180,9 +193,11 @@ class TestAttemptService
     public function getTestAttemptsByPaper(int $paperId, ?int $perPage = 10, array $columns = ['*'], array $relations = []): Paginator|Collection
     {
         $query = TestAttempt::forPaper($paperId)->with($relations);
+        
         if ($perPage) {
             return $query->paginate($perPage, $columns);
         }
+        
         return $query->get($columns);
     }
 
@@ -191,21 +206,12 @@ class TestAttemptService
      *
      * @param int|null $perPage
      * @param array $columns
-     * @param array $userRelations Relations for users if eager loading is needed for them as well
+     * @param array $userRelations
      * @return Paginator<TestAttempt>|Collection<int, TestAttempt>
      */
     public function getTestAttemptsWithUsers(int $perPage = 10, array $columns = ['*'], array $userRelations = []): Paginator|Collection
     {
-        $query = TestAttempt::with(['user' => function ($query) use ($userRelations) {
-            if (!empty($userRelations)) {
-                $query->with($userRelations);
-            }
-        }]);
-
-        if ($perPage) {
-            return $query->paginate($perPage, $columns);
-        }
-        return $query->get($columns);
+        return $this->getWithNestedRelations('user', $userRelations, $perPage, $columns);
     }
 
     /**
@@ -213,21 +219,12 @@ class TestAttemptService
      *
      * @param int|null $perPage
      * @param array $columns
-     * @param array $paperRelations Relations for papers if eager loading is needed for them as well
+     * @param array $paperRelations
      * @return Paginator<TestAttempt>|Collection<int, TestAttempt>
      */
     public function getTestAttemptsWithPapers(int $perPage = 10, array $columns = ['*'], array $paperRelations = []): Paginator|Collection
     {
-        $query = TestAttempt::with(['paper' => function ($query) use ($paperRelations) {
-            if (!empty($paperRelations)) {
-                $query->with($paperRelations);
-            }
-        }]);
-
-        if ($perPage) {
-            return $query->paginate($perPage, $columns);
-        }
-        return $query->get($columns);
+        return $this->getWithNestedRelations('paper', $paperRelations, $perPage, $columns);
     }
 
     /**
@@ -235,20 +232,49 @@ class TestAttemptService
      *
      * @param int|null $perPage
      * @param array $columns
-     * @param array $answerRelations Relations for answers if eager loading is needed for them as well
+     * @param array $answerRelations
      * @return Paginator<TestAttempt>|Collection<int, TestAttempt>
      */
     public function getTestAttemptsWithAnswers(int $perPage = 10, array $columns = ['*'], array $answerRelations = []): Paginator|Collection
     {
-        $query = TestAttempt::with(['answers' => function ($query) use ($answerRelations) {
-            if (!empty($answerRelations)) {
-                $query->with($answerRelations);
-            }
-        }]);
-
-        if ($perPage) {
-            return $query->paginate($perPage, $columns);
-        }
-        return $query->get($columns);
+        return $this->getWithNestedRelations('answers', $answerRelations, $perPage, $columns);
+    }
+    
+    /**
+     * Get score for a test attempt.
+     *
+     * @param TestAttempt $testAttempt
+     * @return float|int
+     */
+    public function getTestAttemptScore(TestAttempt $testAttempt): float|int
+    {
+        return $testAttempt->calculateScore();
+    }
+    
+    /**
+     * Mark a test attempt as completed.
+     *
+     * @param TestAttempt $testAttempt
+     * @return TestAttempt
+     */
+    public function completeTestAttempt(TestAttempt $testAttempt): TestAttempt
+    {
+        $testAttempt->completed_at = now();
+        $testAttempt->save();
+        
+        return $testAttempt;
+    }
+    
+    /**
+     * Get recent test attempts.
+     *
+     * @param int $limit
+     * @param array $columns
+     * @param array $relations
+     * @return Collection<int, TestAttempt>
+     */
+    public function getRecentTestAttempts(int $limit = 10, array $columns = ['*'], array $relations = []): Collection
+    {
+        return TestAttempt::with($relations)->latest('created_at')->limit($limit)->get($columns);
     }
 }

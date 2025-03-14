@@ -6,8 +6,16 @@ use App\Models\PaperCategory;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Contracts\Pagination\Paginator;
 
-class PaperCategoryService
+class PaperCategoryService extends BaseService
 {
+    /**
+     * PaperCategoryService constructor.
+     */
+    public function __construct()
+    {
+        $this->modelClass = PaperCategory::class;
+    }
+    
     /**
      * Get all paper categories.
      *
@@ -17,7 +25,7 @@ class PaperCategoryService
      */
     public function getAllPaperCategories(array $columns = ['*'], array $relations = []): Collection
     {
-        return PaperCategory::with($relations)->get($columns);
+        return $this->getAll($columns, $relations);
     }
 
     /**
@@ -30,7 +38,7 @@ class PaperCategoryService
      */
     public function getPaginatedPaperCategories(int $perPage = 10, array $columns = ['*'], array $relations = []): Paginator
     {
-        return PaperCategory::with($relations)->paginate($perPage, $columns);
+        return $this->getPaginated($perPage, $columns, $relations);
     }
 
     /**
@@ -43,7 +51,7 @@ class PaperCategoryService
      */
     public function getPaperCategoryById(int $id, array $columns = ['*'], array $relations = []): ?PaperCategory
     {
-        return PaperCategory::with($relations)->find($id, $columns);
+        return $this->getById($id, $columns, $relations);
     }
 
     /**
@@ -56,7 +64,7 @@ class PaperCategoryService
      */
     public function getPaperCategoryByIdOrFail(int $id, array $columns = ['*'], array $relations = []): PaperCategory
     {
-        return PaperCategory::with($relations)->findOrFail($id, $columns);
+        return $this->getByIdOrFail($id, $columns, $relations);
     }
 
     /**
@@ -67,7 +75,7 @@ class PaperCategoryService
      */
     public function createPaperCategory(array $data): PaperCategory
     {
-        return PaperCategory::create($data);
+        return $this->create($data);
     }
 
     /**
@@ -79,8 +87,7 @@ class PaperCategoryService
      */
     public function updatePaperCategory(PaperCategory $paperCategory, array $data): PaperCategory
     {
-        $paperCategory->update($data);
-        return $paperCategory;
+        return $this->update($paperCategory, $data);
     }
 
     /**
@@ -91,7 +98,7 @@ class PaperCategoryService
      */
     public function deletePaperCategory(PaperCategory $paperCategory): ?bool
     {
-        return $paperCategory->delete();
+        return $this->delete($paperCategory);
     }
 
     /**
@@ -102,7 +109,7 @@ class PaperCategoryService
      */
     public function restorePaperCategory(int $id): bool
     {
-        return PaperCategory::withTrashed()->findOrFail($id)->restore();
+        return $this->restore($id);
     }
 
     /**
@@ -113,7 +120,7 @@ class PaperCategoryService
      */
     public function forceDeletePaperCategory(int $id): ?bool
     {
-        return PaperCategory::withTrashed()->findOrFail($id)->forceDelete();
+        return $this->forceDelete($id);
     }
 
     /**
@@ -127,11 +134,7 @@ class PaperCategoryService
      */
     public function searchPaperCategories(string $searchTerm, ?int $perPage = 10, array $columns = ['*'], array $relations = []): Paginator|Collection
     {
-        $query = PaperCategory::search($searchTerm)->with($relations);
-        if ($perPage) {
-            return $query->paginate($perPage, $columns);
-        }
-        return $query->get($columns);
+        return $this->search($searchTerm, $perPage, $columns, $relations);
     }
 
     /**
@@ -139,20 +142,41 @@ class PaperCategoryService
      *
      * @param int|null $perPage
      * @param array $columns
-     * @param array $paperRelations Relations for papers if eager loading is needed for them as well
+     * @param array $paperRelations
      * @return Paginator<PaperCategory>|Collection<int, PaperCategory>
      */
     public function getPaperCategoriesWithPapers(int $perPage = 10, array $columns = ['*'], array $paperRelations = []): Paginator|Collection
     {
-        $query = PaperCategory::with(['papers' => function ($query) use ($paperRelations) {
-            if (!empty($paperRelations)) {
-                $query->with($paperRelations);
-            }
-        }]);
+        return $this->getWithNestedRelations('papers', $paperRelations, $perPage, $columns);
+    }
 
-        if ($perPage) {
-            return $query->paginate($perPage, $columns);
-        }
-        return $query->get($columns);
+    /**
+     * Get a paper category by name.
+     *
+     * @param string $name
+     * @param array $columns
+     * @param array $relations
+     * @return PaperCategory|null
+     */
+    public function getPaperCategoryByName(string $name, array $columns = ['*'], array $relations = []): ?PaperCategory
+    {
+        return PaperCategory::where('name', $name)->with($relations)->first($columns);
+    }
+
+    /**
+     * Get popular paper categories.
+     *
+     * @param int $limit
+     * @param array $columns
+     * @param array $relations
+     * @return Collection<int, PaperCategory>
+     */
+    public function getPopularPaperCategories(int $limit = 10, array $columns = ['*'], array $relations = []): Collection
+    {
+        return PaperCategory::withCount('papers')
+            ->with($relations)
+            ->orderByDesc('papers_count')
+            ->limit($limit)
+            ->get($columns);
     }
 }

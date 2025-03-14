@@ -36,6 +36,11 @@ new class extends Component {
         $this->success("Will Edit #$id", 'It is fake.', position: 'toast-top');
     }
 
+    public function print()
+    {
+        $this->dispatch('printTable');
+    }
+
     // Table headers
     public function headers(): array
     {
@@ -85,11 +90,12 @@ new class extends Component {
         </x-slot:middle>
         <x-slot:actions>
             <x-button label="Filters" @click="$wire.drawer = true" responsive icon="o-funnel" />
+            <x-button label="Print" wire:click="print" responsive icon="o-printer" />
         </x-slot:actions>
     </x-header>
 
     <!-- TABLE  -->
-    <x-card>
+    <x-card id="printable-table">
         <x-table :headers="$headers" :rows="$users" :sort-by="$sortBy">
             @scope('actions', $user)
                 <x-button icon="o-trash" wire:click="delete({{ $user['id'] }})" wire:confirm="Are you sure?" spinner class="btn-ghost btn-sm text-red-500" />
@@ -113,6 +119,26 @@ new class extends Component {
         <x-button label="Confirm" class="btn-primary" />
         <x-button label="Cancel" @click="$wire.addEditModal = false" />
     </x-modal>
+
+    <script>
+        document.addEventListener('livewire:initialized', () => {
+            @this.on('printTable', () => {
+                const printContents = document.getElementById('printable-table').innerHTML;
+                const originalContents = document.body.innerHTML;
+                
+                document.body.innerHTML = `
+                    <div class="print-container">
+                        <h1 class="text-center text-xl font-bold mb-4">Users List</h1>
+                        ${printContents}
+                    </div>
+                `;
+                
+                window.print();
+                document.body.innerHTML = originalContents;
+                @this.dispatch('livewire:initialized');
+            });
+        });
+    </script>
 </div>
 
 

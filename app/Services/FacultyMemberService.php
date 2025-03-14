@@ -7,8 +7,16 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Contracts\Pagination\Paginator;
 use Illuminate\Support\Facades\Hash;
 
-class FacultyMemberService
+class FacultyMemberService extends BaseService
 {
+    /**
+     * FacultyMemberService constructor.
+     */
+    public function __construct()
+    {
+        $this->modelClass = FacultyMember::class;
+    }
+    
     /**
      * Get all faculty members.
      *
@@ -18,7 +26,7 @@ class FacultyMemberService
      */
     public function getAllFacultyMembers(array $columns = ['*'], array $relations = []): Collection
     {
-        return FacultyMember::with($relations)->get($columns);
+        return $this->getAll($columns, $relations);
     }
 
     /**
@@ -31,7 +39,7 @@ class FacultyMemberService
      */
     public function getPaginatedFacultyMembers(int $perPage = 10, array $columns = ['*'], array $relations = []): Paginator
     {
-        return FacultyMember::with($relations)->paginate($perPage, $columns);
+        return $this->getPaginated($perPage, $columns, $relations);
     }
 
     /**
@@ -44,7 +52,7 @@ class FacultyMemberService
      */
     public function getFacultyMemberById(int $id, array $columns = ['*'], array $relations = []): ?FacultyMember
     {
-        return FacultyMember::with($relations)->find($id, $columns);
+        return $this->getById($id, $columns, $relations);
     }
 
     /**
@@ -57,7 +65,7 @@ class FacultyMemberService
      */
     public function getFacultyMemberByIdOrFail(int $id, array $columns = ['*'], array $relations = []): FacultyMember
     {
-        return FacultyMember::with($relations)->findOrFail($id, $columns);
+        return $this->getByIdOrFail($id, $columns, $relations);
     }
 
     /**
@@ -68,8 +76,11 @@ class FacultyMemberService
      */
     public function createFacultyMember(array $data): FacultyMember
     {
-        $data['password'] = Hash::make($data['password']); // Hash password before creating
-        return FacultyMember::create($data);
+        if (isset($data['password'])) {
+            $data['password'] = Hash::make($data['password']); // Hash password before creating
+        }
+        
+        return $this->create($data);
     }
 
     /**
@@ -84,8 +95,8 @@ class FacultyMemberService
         if (isset($data['password'])) {
             $data['password'] = Hash::make($data['password']); // Hash password if updated
         }
-        $facultyMember->update($data);
-        return $facultyMember;
+        
+        return $this->update($facultyMember, $data);
     }
 
     /**
@@ -96,7 +107,7 @@ class FacultyMemberService
      */
     public function deleteFacultyMember(FacultyMember $facultyMember): ?bool
     {
-        return $facultyMember->delete();
+        return $this->delete($facultyMember);
     }
 
     /**
@@ -107,7 +118,7 @@ class FacultyMemberService
      */
     public function restoreFacultyMember(int $id): bool
     {
-        return FacultyMember::withTrashed()->findOrFail($id)->restore();
+        return $this->restore($id);
     }
 
     /**
@@ -118,7 +129,7 @@ class FacultyMemberService
      */
     public function forceDeleteFacultyMember(int $id): ?bool
     {
-        return FacultyMember::withTrashed()->findOrFail($id)->forceDelete();
+        return $this->forceDelete($id);
     }
 
     /**
@@ -132,11 +143,7 @@ class FacultyMemberService
      */
     public function searchFacultyMembers(string $searchTerm, ?int $perPage = 10, array $columns = ['*'], array $relations = []): Paginator|Collection
     {
-        $query = FacultyMember::search($searchTerm)->with($relations);
-        if ($perPage) {
-            return $query->paginate($perPage, $columns);
-        }
-        return $query->get($columns);
+        return $this->search($searchTerm, $perPage, $columns, $relations);
     }
 
     /**
@@ -150,9 +157,11 @@ class FacultyMemberService
     public function getActiveFacultyMembers(int $perPage = 10, array $columns = ['*'], array $relations = []): Paginator|Collection
     {
         $query = FacultyMember::active()->with($relations);
+        
         if ($perPage) {
             return $query->paginate($perPage, $columns);
         }
+        
         return $query->get($columns);
     }
 
@@ -168,9 +177,11 @@ class FacultyMemberService
     public function getFacultyMembersByDepartment(int $departmentId, ?int $perPage = 10, array $columns = ['*'], array $relations = []): Paginator|Collection
     {
         $query = FacultyMember::where('department_id', $departmentId)->with($relations);
+        
         if ($perPage) {
             return $query->paginate($perPage, $columns);
         }
+        
         return $query->get($columns);
     }
 
@@ -179,21 +190,12 @@ class FacultyMemberService
      *
      * @param int|null $perPage
      * @param array $columns
-     * @param array $departmentRelations Relations for departments if eager loading is needed for them as well
+     * @param array $departmentRelations
      * @return Paginator<FacultyMember>|Collection<int, FacultyMember>
      */
     public function getFacultyMembersWithDepartments(int $perPage = 10, array $columns = ['*'], array $departmentRelations = []): Paginator|Collection
     {
-        $query = FacultyMember::with(['department' => function ($query) use ($departmentRelations) {
-            if (!empty($departmentRelations)) {
-                $query->with($departmentRelations);
-            }
-        }]);
-
-        if ($perPage) {
-            return $query->paginate($perPage, $columns);
-        }
-        return $query->get($columns);
+        return $this->getWithNestedRelations('department', $departmentRelations, $perPage, $columns);
     }
 
     /**
@@ -201,21 +203,12 @@ class FacultyMemberService
      *
      * @param int|null $perPage
      * @param array $columns
-     * @param array $subjectRelations Relations for subjects if eager loading is needed for them as well
+     * @param array $subjectRelations
      * @return Paginator<FacultyMember>|Collection<int, FacultyMember>
      */
     public function getFacultyMembersWithSubjects(int $perPage = 10, array $columns = ['*'], array $subjectRelations = []): Paginator|Collection
     {
-        $query = FacultyMember::with(['subjects' => function ($query) use ($subjectRelations) {
-            if (!empty($subjectRelations)) {
-                $query->with($subjectRelations);
-            }
-        }]);
-
-        if ($perPage) {
-            return $query->paginate($perPage, $columns);
-        }
-        return $query->get($columns);
+        return $this->getWithNestedRelations('subjects', $subjectRelations, $perPage, $columns);
     }
 
     /**
@@ -240,5 +233,38 @@ class FacultyMemberService
     public function removeSubjectFromFacultyMember(FacultyMember $facultyMember, int $subjectId): void
     {
         $facultyMember->subjects()->detach($subjectId);
+    }
+
+    /**
+     * Get faculty member by email.
+     *
+     * @param string $email
+     * @param array $columns
+     * @param array $relations
+     * @return FacultyMember|null
+     */
+    public function getFacultyMemberByEmail(string $email, array $columns = ['*'], array $relations = []): ?FacultyMember
+    {
+        return FacultyMember::where('email', $email)->with($relations)->first($columns);
+    }
+
+    /**
+     * Get faculty members by role.
+     *
+     * @param string $role
+     * @param int|null $perPage
+     * @param array $columns
+     * @param array $relations
+     * @return Paginator<FacultyMember>|Collection<int, FacultyMember>
+     */
+    public function getFacultyMembersByRole(string $role, ?int $perPage = 10, array $columns = ['*'], array $relations = []): Paginator|Collection
+    {
+        $query = FacultyMember::role($role)->with($relations);
+        
+        if ($perPage) {
+            return $query->paginate($perPage, $columns);
+        }
+        
+        return $query->get($columns);
     }
 }

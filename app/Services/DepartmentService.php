@@ -6,8 +6,16 @@ use App\Models\Department;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Contracts\Pagination\Paginator;
 
-class DepartmentService
+class DepartmentService extends BaseService
 {
+    /**
+     * DepartmentService constructor.
+     */
+    public function __construct()
+    {
+        $this->modelClass = Department::class;
+    }
+    
     /**
      * Get all departments.
      *
@@ -17,7 +25,7 @@ class DepartmentService
      */
     public function getAllDepartments(array $columns = ['*'], array $relations = []): Collection
     {
-        return Department::with($relations)->get($columns);
+        return $this->getAll($columns, $relations);
     }
 
     /**
@@ -30,7 +38,7 @@ class DepartmentService
      */
     public function getPaginatedDepartments(int $perPage = 10, array $columns = ['*'], array $relations = []): Paginator
     {
-        return Department::with($relations)->paginate($perPage, $columns);
+        return $this->getPaginated($perPage, $columns, $relations);
     }
 
     /**
@@ -43,7 +51,7 @@ class DepartmentService
      */
     public function getDepartmentById(int $id, array $columns = ['*'], array $relations = []): ?Department
     {
-        return Department::with($relations)->find($id, $columns);
+        return $this->getById($id, $columns, $relations);
     }
 
     /**
@@ -56,7 +64,7 @@ class DepartmentService
      */
     public function getDepartmentByIdOrFail(int $id, array $columns = ['*'], array $relations = []): Department
     {
-        return Department::with($relations)->findOrFail($id, $columns);
+        return $this->getByIdOrFail($id, $columns, $relations);
     }
 
     /**
@@ -67,7 +75,7 @@ class DepartmentService
      */
     public function createDepartment(array $data): Department
     {
-        return Department::create($data);
+        return $this->create($data);
     }
 
     /**
@@ -79,8 +87,7 @@ class DepartmentService
      */
     public function updateDepartment(Department $department, array $data): Department
     {
-        $department->update($data);
-        return $department;
+        return $this->update($department, $data);
     }
 
     /**
@@ -91,7 +98,7 @@ class DepartmentService
      */
     public function deleteDepartment(Department $department): ?bool
     {
-        return $department->delete();
+        return $this->delete($department);
     }
 
     /**
@@ -102,7 +109,7 @@ class DepartmentService
      */
     public function restoreDepartment(int $id): bool
     {
-        return Department::withTrashed()->findOrFail($id)->restore();
+        return $this->restore($id);
     }
 
     /**
@@ -113,7 +120,7 @@ class DepartmentService
      */
     public function forceDeleteDepartment(int $id): ?bool
     {
-        return Department::withTrashed()->findOrFail($id)->forceDelete();
+        return $this->forceDelete($id);
     }
 
     /**
@@ -127,11 +134,7 @@ class DepartmentService
      */
     public function searchDepartments(string $searchTerm, ?int $perPage = 10, array $columns = ['*'], array $relations = []): Paginator|Collection
     {
-        $query = Department::search($searchTerm)->with($relations);
-        if ($perPage) {
-            return $query->paginate($perPage, $columns);
-        }
-        return $query->get($columns);
+        return $this->search($searchTerm, $perPage, $columns, $relations);
     }
 
     /**
@@ -139,21 +142,12 @@ class DepartmentService
      *
      * @param int|null $perPage
      * @param array $columns
-     * @param array $facultyRelations Relations for faculty members if eager loading is needed for them as well
+     * @param array $facultyRelations
      * @return Paginator<Department>|Collection<int, Department>
      */
     public function getDepartmentsWithFaculty(int $perPage = 10, array $columns = ['*'], array $facultyRelations = []): Paginator|Collection
     {
-        $query = Department::with(['facultyMembers' => function ($query) use ($facultyRelations) {
-            if (!empty($facultyRelations)) {
-                $query->with($facultyRelations);
-            }
-        }]);
-
-        if ($perPage) {
-            return $query->paginate($perPage, $columns);
-        }
-        return $query->get($columns);
+        return $this->getWithNestedRelations('facultyMembers', $facultyRelations, $perPage, $columns);
     }
 
     /**
@@ -161,21 +155,12 @@ class DepartmentService
      *
      * @param int|null $perPage
      * @param array $columns
-     * @param array $subjectRelations Relations for subjects if eager loading is needed for them as well
+     * @param array $subjectRelations
      * @return Paginator<Department>|Collection<int, Department>
      */
     public function getDepartmentsWithSubjects(int $perPage = 10, array $columns = ['*'], array $subjectRelations = []): Paginator|Collection
     {
-        $query = Department::with(['subjects' => function ($query) use ($subjectRelations) {
-            if (!empty($subjectRelations)) {
-                $query->with($subjectRelations);
-            }
-        }]);
-
-        if ($perPage) {
-            return $query->paginate($perPage, $columns);
-        }
-        return $query->get($columns);
+        return $this->getWithNestedRelations('subjects', $subjectRelations, $perPage, $columns);
     }
 
     /**
@@ -200,5 +185,56 @@ class DepartmentService
     public function removeSubjectFromDepartment(Department $department, int $subjectId): void
     {
         $department->subjects()->detach($subjectId);
+    }
+    
+    /**
+     * Get a department by name.
+     *
+     * @param string $name
+     * @param array $columns
+     * @param array $relations
+     * @return Department|null
+     */
+    public function getDepartmentByName(string $name, array $columns = ['*'], array $relations = []): ?Department
+    {
+        return Department::where('name', $name)->with($relations)->first($columns);
+    }
+    
+    /**
+     * Get departments with faculty count.
+     *
+     * @param int|null $perPage
+     * @param array $columns
+     * @param array $relations
+     * @return Paginator<Department>|Collection<int, Department>
+     */
+    public function getDepartmentsWithFacultyCount(?int $perPage = 10, array $columns = ['*'], array $relations = []): Paginator|Collection
+    {
+        $query = Department::withCount('facultyMembers')->with($relations);
+        
+        if ($perPage) {
+            return $query->paginate($perPage, $columns);
+        }
+        
+        return $query->get($columns);
+    }
+    
+    /**
+     * Get departments with subject count.
+     *
+     * @param int|null $perPage
+     * @param array $columns
+     * @param array $relations
+     * @return Paginator<Department>|Collection<int, Department>
+     */
+    public function getDepartmentsWithSubjectCount(?int $perPage = 10, array $columns = ['*'], array $relations = []): Paginator|Collection
+    {
+        $query = Department::withCount('subjects')->with($relations);
+        
+        if ($perPage) {
+            return $query->paginate($perPage, $columns);
+        }
+        
+        return $query->get($columns);
     }
 }

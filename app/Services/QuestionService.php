@@ -6,8 +6,16 @@ use App\Models\Question;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Contracts\Pagination\Paginator;
 
-class QuestionService
+class QuestionService extends BaseService
 {
+    /**
+     * QuestionService constructor.
+     */
+    public function __construct()
+    {
+        $this->modelClass = Question::class;
+    }
+    
     /**
      * Get all questions.
      *
@@ -17,7 +25,7 @@ class QuestionService
      */
     public function getAllQuestions(array $columns = ['*'], array $relations = []): Collection
     {
-        return Question::with($relations)->get($columns);
+        return $this->getAll($columns, $relations);
     }
 
     /**
@@ -30,7 +38,7 @@ class QuestionService
      */
     public function getPaginatedQuestions(int $perPage = 10, array $columns = ['*'], array $relations = []): Paginator
     {
-        return Question::with($relations)->paginate($perPage, $columns);
+        return $this->getPaginated($perPage, $columns, $relations);
     }
 
     /**
@@ -43,7 +51,7 @@ class QuestionService
      */
     public function getQuestionById(int $id, array $columns = ['*'], array $relations = []): ?Question
     {
-        return Question::with($relations)->find($id, $columns);
+        return $this->getById($id, $columns, $relations);
     }
 
     /**
@@ -56,7 +64,7 @@ class QuestionService
      */
     public function getQuestionByIdOrFail(int $id, array $columns = ['*'], array $relations = []): Question
     {
-        return Question::with($relations)->findOrFail($id, $columns);
+        return $this->getByIdOrFail($id, $columns, $relations);
     }
 
     /**
@@ -67,7 +75,7 @@ class QuestionService
      */
     public function createQuestion(array $data): Question
     {
-        return Question::create($data);
+        return $this->create($data);
     }
 
     /**
@@ -79,8 +87,7 @@ class QuestionService
      */
     public function updateQuestion(Question $question, array $data): Question
     {
-        $question->update($data);
-        return $question;
+        return $this->update($question, $data);
     }
 
     /**
@@ -91,7 +98,7 @@ class QuestionService
      */
     public function deleteQuestion(Question $question): ?bool
     {
-        return $question->delete();
+        return $this->delete($question);
     }
 
     /**
@@ -102,7 +109,7 @@ class QuestionService
      */
     public function restoreQuestion(int $id): bool
     {
-        return Question::withTrashed()->findOrFail($id)->restore();
+        return $this->restore($id);
     }
 
     /**
@@ -113,7 +120,7 @@ class QuestionService
      */
     public function forceDeleteQuestion(int $id): ?bool
     {
-        return Question::withTrashed()->findOrFail($id)->forceDelete();
+        return $this->forceDelete($id);
     }
 
     /**
@@ -127,11 +134,7 @@ class QuestionService
      */
     public function searchQuestions(string $searchTerm, ?int $perPage = 10, array $columns = ['*'], array $relations = []): Paginator|Collection
     {
-        $query = Question::search($searchTerm)->with($relations);
-        if ($perPage) {
-            return $query->paginate($perPage, $columns);
-        }
-        return $query->get($columns);
+        return $this->search($searchTerm, $perPage, $columns, $relations);
     }
 
     /**
@@ -146,9 +149,11 @@ class QuestionService
     public function getQuestionsByType(int $questionTypeId, ?int $perPage = 10, array $columns = ['*'], array $relations = []): Paginator|Collection
     {
         $query = Question::ofType($questionTypeId)->with($relations);
+        
         if ($perPage) {
             return $query->paginate($perPage, $columns);
         }
+        
         return $query->get($columns);
     }
 
@@ -164,9 +169,11 @@ class QuestionService
     public function getQuestionsBySubject(int $subjectId, ?int $perPage = 10, array $columns = ['*'], array $relations = []): Paginator|Collection
     {
         $query = Question::ofSubject($subjectId)->with($relations);
+        
         if ($perPage) {
             return $query->paginate($perPage, $columns);
         }
+        
         return $query->get($columns);
     }
 
@@ -175,21 +182,12 @@ class QuestionService
      *
      * @param int|null $perPage
      * @param array $columns
-     * @param array $questionTypeRelations Relations for question types if eager loading is needed for them as well
+     * @param array $questionTypeRelations
      * @return Paginator<Question>|Collection<int, Question>
      */
     public function getQuestionsWithQuestionType(int $perPage = 10, array $columns = ['*'], array $questionTypeRelations = []): Paginator|Collection
     {
-        $query = Question::with(['questionType' => function ($query) use ($questionTypeRelations) {
-            if (!empty($questionTypeRelations)) {
-                $query->with($questionTypeRelations);
-            }
-        }]);
-
-        if ($perPage) {
-            return $query->paginate($perPage, $columns);
-        }
-        return $query->get($columns);
+        return $this->getWithNestedRelations('questionType', $questionTypeRelations, $perPage, $columns);
     }
 
     /**
@@ -197,21 +195,12 @@ class QuestionService
      *
      * @param int|null $perPage
      * @param array $columns
-     * @param array $subjectRelations Relations for subjects if eager loading is needed for them as well
+     * @param array $subjectRelations
      * @return Paginator<Question>|Collection<int, Question>
      */
     public function getQuestionsWithSubject(int $perPage = 10, array $columns = ['*'], array $subjectRelations = []): Paginator|Collection
     {
-        $query = Question::with(['subject' => function ($query) use ($subjectRelations) {
-            if (!empty($subjectRelations)) {
-                $query->with($subjectRelations);
-            }
-        }]);
-
-        if ($perPage) {
-            return $query->paginate($perPage, $columns);
-        }
-        return $query->get($columns);
+        return $this->getWithNestedRelations('subject', $subjectRelations, $perPage, $columns);
     }
 
     /**
@@ -219,21 +208,12 @@ class QuestionService
      *
      * @param int|null $perPage
      * @param array $columns
-     * @param array $optionRelations Relations for options if eager loading is needed for them as well
+     * @param array $optionRelations
      * @return Paginator<Question>|Collection<int, Question>
      */
     public function getQuestionsWithOptions(int $perPage = 10, array $columns = ['*'], array $optionRelations = []): Paginator|Collection
     {
-        $query = Question::with(['options' => function ($query) use ($optionRelations) {
-            if (!empty($optionRelations)) {
-                $query->with($optionRelations);
-            }
-        }]);
-
-        if ($perPage) {
-            return $query->paginate($perPage, $columns);
-        }
-        return $query->get($columns);
+        return $this->getWithNestedRelations('options', $optionRelations, $perPage, $columns);
     }
 
     /**
@@ -241,20 +221,77 @@ class QuestionService
      *
      * @param int|null $perPage
      * @param array $columns
-     * @param array $answerRelations Relations for answers if eager loading is needed for them as well
+     * @param array $answerRelations
      * @return Paginator<Question>|Collection<int, Question>
      */
     public function getQuestionsWithAnswers(int $perPage = 10, array $columns = ['*'], array $answerRelations = []): Paginator|Collection
     {
-        $query = Question::with(['answers' => function ($query) use ($answerRelations) {
-            if (!empty($answerRelations)) {
-                $query->with($answerRelations);
-            }
-        }]);
-
+        return $this->getWithNestedRelations('answers', $answerRelations, $perPage, $columns);
+    }
+    
+    /**
+     * Get random questions.
+     *
+     * @param int $count
+     * @param array|null $subjectIds
+     * @param array|null $questionTypeIds
+     * @param array $relations
+     * @return Collection<int, Question>
+     */
+    public function getRandomQuestions(int $count, ?array $subjectIds = null, ?array $questionTypeIds = null, array $relations = []): Collection
+    {
+        $query = Question::query()->with($relations);
+        
+        if ($subjectIds) {
+            $query->whereIn('subject_id', $subjectIds);
+        }
+        
+        if ($questionTypeIds) {
+            $query->whereIn('question_type_id', $questionTypeIds);
+        }
+        
+        return $query->inRandomOrder()->limit($count)->get();
+    }
+    
+    /**
+     * Get questions for a paper.
+     *
+     * @param int $paperId
+     * @param int|null $perPage
+     * @param array $columns
+     * @param array $relations
+     * @return Paginator<Question>|Collection<int, Question>
+     */
+    public function getQuestionsForPaper(int $paperId, ?int $perPage = null, array $columns = ['*'], array $relations = []): Paginator|Collection
+    {
+        $query = Question::whereHas('papers', function($query) use ($paperId) {
+            $query->where('paper_id', $paperId);
+        })->with($relations);
+        
         if ($perPage) {
             return $query->paginate($perPage, $columns);
         }
+        
+        return $query->get($columns);
+    }
+
+    /**
+     * Get questions by difficulty level.
+     *
+     * @param int $difficultyLevel
+     * @param int|null $perPage
+     * @param array $columns
+     * @param array $relations
+     * @return Paginator<Question>|Collection<int, Question>
+     */
+    public function getQuestionsByDifficultyLevel(int $difficultyLevel, ?int $perPage = 10, array $columns = ['*'], array $relations = []): Paginator|Collection
+    {
+        $query = Question::where('difficulty_level', $difficultyLevel)->with($relations);
+        
+        if ($perPage) {
+            return $query->paginate($perPage, $columns);
+        }
+        
         return $query->get($columns);
     }
 }

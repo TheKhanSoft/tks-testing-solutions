@@ -14,6 +14,10 @@ class PaperCategoryController extends Controller
     public function __construct(PaperCategoryService $paperCategoryService)
     {
         $this->paperCategoryService = $paperCategoryService;
+        $this->middleware('permission:view-paper-categories')->only(['index', 'show', 'search']);
+        $this->middleware('permission:create-paper-categories')->only(['create', 'store']);
+        $this->middleware('permission:edit-paper-categories')->only(['edit', 'update']);
+        $this->middleware('permission:delete-paper-categories')->only('destroy');
     }
 
     /**
@@ -24,7 +28,7 @@ class PaperCategoryController extends Controller
     public function index()
     {
         $paperCategories = $this->paperCategoryService->getPaginatedPaperCategories();
-        return view('paper_categories.index', compact('paperCategories')); // Assuming you have a paper_categories.index view
+        return view('paper_categories.index', compact('paperCategories'));
     }
 
     /**
@@ -34,7 +38,7 @@ class PaperCategoryController extends Controller
      */
     public function create()
     {
-        return view('paper_categories.create'); // Assuming you have a paper_categories.create view
+        return view('paper_categories.create');
     }
 
     /**
@@ -46,9 +50,16 @@ class PaperCategoryController extends Controller
     public function store(PaperCategoryFormRequest $request)
     {
         $validatedData = $request->validated();
-        $this->paperCategoryService->createPaperCategory($validatedData);
-
-        return redirect()->route('paper-categories.index')->with('success', 'Paper Category created successfully!');
+        
+        try {
+            $this->paperCategoryService->createPaperCategory($validatedData);
+            return redirect()->route('paper-categories.index')
+                ->with('success', 'Paper Category created successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Error creating paper category: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -59,7 +70,9 @@ class PaperCategoryController extends Controller
      */
     public function show(PaperCategory $paperCategory)
     {
-        return view('paper_categories.show', compact('paperCategory')); // Assuming you have a paper_categories.show view
+        // Eager load related papers to avoid N+1 query problem
+        $paperCategory->load('papers');
+        return view('paper_categories.show', compact('paperCategory'));
     }
 
     /**
@@ -70,7 +83,7 @@ class PaperCategoryController extends Controller
      */
     public function edit(PaperCategory $paperCategory)
     {
-        return view('paper_categories.edit', compact('paperCategory')); // Assuming you have a paper_categories.edit view
+        return view('paper_categories.edit', compact('paperCategory'));
     }
 
     /**
@@ -83,9 +96,16 @@ class PaperCategoryController extends Controller
     public function update(PaperCategoryFormRequest $request, PaperCategory $paperCategory)
     {
         $validatedData = $request->validated();
-        $this->paperCategoryService->updatePaperCategory($paperCategory, $validatedData);
-
-        return redirect()->route('paper-categories.index')->with('success', 'Paper Category updated successfully!');
+        
+        try {
+            $this->paperCategoryService->updatePaperCategory($paperCategory, $validatedData);
+            return redirect()->route('paper-categories.index')
+                ->with('success', 'Paper Category updated successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', 'Error updating paper category: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -96,9 +116,14 @@ class PaperCategoryController extends Controller
      */
     public function destroy(PaperCategory $paperCategory)
     {
-        $this->paperCategoryService->deletePaperCategory($paperCategory);
-
-        return redirect()->route('paper-categories.index')->with('success', 'Paper Category deleted successfully!');
+        try {
+            $this->paperCategoryService->deletePaperCategory($paperCategory);
+            return redirect()->route('paper-categories.index')
+                ->with('success', 'Paper Category deleted successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Error deleting paper category: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -111,6 +136,6 @@ class PaperCategoryController extends Controller
     {
         $searchTerm = $request->input('search');
         $paperCategories = $this->paperCategoryService->searchPaperCategories($searchTerm);
-        return view('paper_categories.index', compact('paperCategories', 'searchTerm')); // Reusing index view, passing searchTerm
+        return view('paper_categories.index', compact('paperCategories', 'searchTerm'));
     }
 }

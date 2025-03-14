@@ -6,8 +6,16 @@ use App\Models\QuestionType;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Contracts\Pagination\Paginator;
 
-class QuestionTypeService
+class QuestionTypeService extends BaseService
 {
+    /**
+     * QuestionTypeService constructor.
+     */
+    public function __construct()
+    {
+        $this->modelClass = QuestionType::class;
+    }
+    
     /**
      * Get all question types.
      *
@@ -17,7 +25,7 @@ class QuestionTypeService
      */
     public function getAllQuestionTypes(array $columns = ['*'], array $relations = []): Collection
     {
-        return QuestionType::with($relations)->get($columns);
+        return $this->getAll($columns, $relations);
     }
 
     /**
@@ -30,7 +38,7 @@ class QuestionTypeService
      */
     public function getPaginatedQuestionTypes(int $perPage = 10, array $columns = ['*'], array $relations = []): Paginator
     {
-        return QuestionType::with($relations)->paginate($perPage, $columns);
+        return $this->getPaginated($perPage, $columns, $relations);
     }
 
     /**
@@ -43,7 +51,7 @@ class QuestionTypeService
      */
     public function getQuestionTypeById(int $id, array $columns = ['*'], array $relations = []): ?QuestionType
     {
-        return QuestionType::with($relations)->find($id, $columns);
+        return $this->getById($id, $columns, $relations);
     }
 
     /**
@@ -56,7 +64,7 @@ class QuestionTypeService
      */
     public function getQuestionTypeByIdOrFail(int $id, array $columns = ['*'], array $relations = []): QuestionType
     {
-        return QuestionType::with($relations)->findOrFail($id, $columns);
+        return $this->getByIdOrFail($id, $columns, $relations);
     }
 
     /**
@@ -67,7 +75,7 @@ class QuestionTypeService
      */
     public function createQuestionType(array $data): QuestionType
     {
-        return QuestionType::create($data);
+        return $this->create($data);
     }
 
     /**
@@ -79,8 +87,7 @@ class QuestionTypeService
      */
     public function updateQuestionType(QuestionType $questionType, array $data): QuestionType
     {
-        $questionType->update($data);
-        return $questionType;
+        return $this->update($questionType, $data);
     }
 
     /**
@@ -91,7 +98,7 @@ class QuestionTypeService
      */
     public function deleteQuestionType(QuestionType $questionType): ?bool
     {
-        return $questionType->delete();
+        return $this->delete($questionType);
     }
 
     /**
@@ -102,7 +109,7 @@ class QuestionTypeService
      */
     public function restoreQuestionType(int $id): bool
     {
-        return QuestionType::withTrashed()->findOrFail($id)->restore();
+        return $this->restore($id);
     }
 
     /**
@@ -113,7 +120,7 @@ class QuestionTypeService
      */
     public function forceDeleteQuestionType(int $id): ?bool
     {
-        return QuestionType::withTrashed()->findOrFail($id)->forceDelete();
+        return $this->forceDelete($id);
     }
 
     /**
@@ -127,11 +134,7 @@ class QuestionTypeService
      */
     public function searchQuestionTypes(string $searchTerm, ?int $perPage = 10, array $columns = ['*'], array $relations = []): Paginator|Collection
     {
-        $query = QuestionType::search($searchTerm)->with($relations);
-        if ($perPage) {
-            return $query->paginate($perPage, $columns);
-        }
-        return $query->get($columns);
+        return $this->search($searchTerm, $perPage, $columns, $relations);
     }
 
     /**
@@ -139,20 +142,39 @@ class QuestionTypeService
      *
      * @param int|null $perPage
      * @param array $columns
-     * @param array $questionRelations Relations for questions if eager loading is needed for them as well
+     * @param array $questionRelations
      * @return Paginator<QuestionType>|Collection<int, QuestionType>
      */
     public function getQuestionTypesWithQuestions(int $perPage = 10, array $columns = ['*'], array $questionRelations = []): Paginator|Collection
     {
-        $query = QuestionType::with(['questions' => function ($query) use ($questionRelations) {
-            if (!empty($questionRelations)) {
-                $query->with($questionRelations);
-            }
-        }]);
+        return $this->getWithNestedRelations('questions', $questionRelations, $perPage, $columns);
+    }
+    
+    /**
+     * Get question types by usage frequency.
+     *
+     * @param int $limit
+     * @param array $columns
+     * @return Collection<int, QuestionType>
+     */
+    public function getQuestionTypesByUsage(int $limit = 10, array $columns = ['*']): Collection
+    {
+        return QuestionType::withCount('questions')
+            ->orderByDesc('questions_count')
+            ->limit($limit)
+            ->get($columns);
+    }
 
-        if ($perPage) {
-            return $query->paginate($perPage, $columns);
-        }
-        return $query->get($columns);
+    /**
+     * Get a question type by name.
+     *
+     * @param string $name
+     * @param array $columns
+     * @param array $relations
+     * @return QuestionType|null
+     */
+    public function getQuestionTypeByName(string $name, array $columns = ['*'], array $relations = []): ?QuestionType
+    {
+        return QuestionType::where('name', $name)->with($relations)->first($columns);
     }
 }
