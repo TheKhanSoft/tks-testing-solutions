@@ -32,13 +32,44 @@ class PaperService extends BaseService
      * Get paginated papers.
      *
      * @param int $perPage
+     * @param array $filters
      * @param array $columns
      * @param array $relations
      * @return Paginator<Paper>
      */
-    public function getPaginatedPapers(int $perPage = 10, array $columns = ['*'], array $relations = []): Paginator
+    public function getPaginatedPapers(int $perPage = 15, array $filters = [], array $columns = ['*'], array $relations = []): Paginator
     {
-        return $this->getPaginated($perPage, $columns, $relations);
+        $query = Paper::query()
+            ->when($filters['search'] ?? null, function($query, $search) {
+                $query->where('title', 'like', "%{$search}%");  // Change 'name' to 'title'
+            })
+            ->when($filters['status'] ?? null, function($query, $status) {
+                $query->where('status', $status);
+            })
+            ->when($filters['paper_category_id'] ?? null, function($query, $categoryId) {
+                $query->where('paper_category_id', $categoryId);
+            })
+            ->when($filters['subject_id'] ?? null, function($query, $subjectId) {
+                $query->where('subject_id', $subjectId);
+            })
+            ->when($filters['sort_by'] ?? null, function($query) use ($filters) {
+                $columnMap = [
+                    'name' => 'title',  // Map 'name' to 'title'
+                    'created_at' => 'created_at',
+                    'total_marks' => 'total_marks',
+                    'duration_minutes' => 'duration_minutes',
+                    'status' => 'status'
+                ];
+                
+                $column = $columnMap[$filters['sort_by']] ?? 'title';
+                $query->orderBy($column, $filters['sort_dir'] ?? 'asc');
+            });
+
+        if (!empty($relations)) {
+            $query->with($relations);
+        }
+
+        return $query->paginate($perPage, $columns);
     }
 
     /**

@@ -19,18 +19,17 @@ class Paper extends Model
      * @var array<string>
      */
     protected $fillable = [
+        'title',  // assuming this is the actual column name instead of 'name'
+        'subject_id',
         'paper_category_id',
-        'title',
         'description',
-        'total_marks',
-        'passing_marks',
         'duration_minutes',
-        'settings',
-        'shuffle_questions',
-        'shuffle_options',
-        'show_results_immediately',
+        'total_marks',
         'passing_percentage',
-        'status',
+        'is_published',
+        'access_code',
+        'instructions',
+        'status'
     ];
 
     /**

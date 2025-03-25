@@ -21,6 +21,7 @@ class Subject extends Model
         'name',
         'code',
         'description',
+        'department_id',  // Add this line
     ];
 
     /**
@@ -96,4 +97,21 @@ class Subject extends Model
                     ->withPivot(['percentage', 'number_of_questions', 'difficulty_distribution'])
                     ->withTimestamps();
     }
+
+    /**
+     * Get the faculty members for the subject
+     */
+    public function facultyMembers()
+    {
+        return $this->belongsToMany(FacultyMember::class, 'faculty_subject', 'subject_id', 'faculty_member_id');
+    }
+
+    /**
+     * Get the department that owns the subject
+     */
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
+    }
+    
 }

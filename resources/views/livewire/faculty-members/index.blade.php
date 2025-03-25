@@ -307,28 +307,34 @@ new class extends Component {
 
     <!-- TABLE  -->
     <x-card id="printable-table">
-        <x-table :headers="$headers" sortable wire:loading.class="opacity-50">
-            @foreach($facultyMembers as $faculty)
-                <tr>
-                    <td>{{ $faculty->id }}</td>
-                    <td>{{ $faculty->name }}</td>
-                    <td>{{ $faculty->email }}</td>
-                    <td>{{ $faculty->phone ?? 'N/A' }}</td>
-                    <td>{{ $faculty->department->name ?? 'N/A' }}</td>
-                    <td>{{ $faculty->subjects_count }}</td>
-                    <td>
-                        <x-badge :value="$faculty->status" 
-                                 :color="$faculty->status === 'active' ? 'success' : 'warning'" />
-                    </td>
-                    <td>
-                        <div class="flex gap-1">
-                            <x-button icon="o-eye" wire:click="view({{ $faculty->id }})" spinner class="btn-ghost btn-sm" title="View Details" />
-                            <x-button icon="o-pencil" wire:click="edit({{ $faculty->id }})" spinner class="btn-ghost btn-sm" title="Edit" />
-                            <x-button icon="o-trash" wire:click="delete({{ $faculty->id }})" wire:confirm="Are you sure you want to delete this faculty member?" spinner class="btn-ghost btn-sm text-red-500" title="Delete" />
-                        </div>
-                    </td>
-                </tr>
-            @endforeach
+        <x-table :headers="$headers" :rows="$facultyMembers" sortable wire:loading.class="opacity-50">
+            @scope('cell_email', $faculty)
+                {{ $faculty->email }}
+                <p class="text-xs text-gray-500">{{ $faculty->phone ?? 'No phone' }}</p>
+            @endscope
+
+            @scope('cell_department', $faculty)
+                {{ $faculty->department->name ?? 'N/A' }}
+            @endscope
+
+            @scope('cell_status', $faculty)
+                <x-badge :value="$faculty->status" 
+                         :color="$faculty->status === 'active' ? 'success' : 'warning'" />
+            @endscope
+
+            @scope('cell_subjects_count', $faculty)
+                {{ $faculty->subjects_count }}
+            @endscope
+
+            @scope('actions', $faculty)
+                <div class="flex gap-1">
+                    <x-button icon="o-eye" wire:click="view({{ $faculty->id }})" spinner class="btn-ghost btn-sm" title="View Details" />
+                    <x-button icon="o-pencil" wire:click="edit({{ $faculty->id }})" spinner class="btn-ghost btn-sm" title="Edit" />
+                    <x-button icon="o-trash" wire:click="delete({{ $faculty->id }})" 
+                        wire:confirm="Are you sure you want to delete this faculty member?" 
+                        spinner class="btn-ghost btn-sm text-red-500" title="Delete" />
+                </div>
+            @endscope
         </x-table>
         
         <div class="mt-4">

@@ -195,24 +195,29 @@ new class extends Component {
 
     <!-- TABLE  -->
     <x-card id="printable-table">
-        <x-table :headers="$headers" sortable wire:loading.class="opacity-50">
-            @foreach($departments as $department)
-                <tr>
-                    <td>{{ $department->id }}</td>
-                    <td>{{ $department->name }}</td>
-                    <td>{{ $department->code }}</td>
-                    <td>{{ $department->faculty_members_count }}</td>
-                    <td>{{ $department->subjects_count }}</td>
-                    <td>{{ $department->created_at->format('Y-m-d') }}</td>
-                    <td>
-                        <div class="flex gap-1">
-                            <x-button icon="o-eye" wire:click="view({{ $department->id }})" spinner class="btn-ghost btn-sm" title="View Details" />
-                            <x-button icon="o-pencil" wire:click="edit({{ $department->id }})" spinner class="btn-ghost btn-sm" title="Edit" />
-                            <x-button icon="o-trash" wire:click="delete({{ $department->id }})" wire:confirm="Are you sure you want to delete this department?" spinner class="btn-ghost btn-sm text-red-500" title="Delete" />
-                        </div>
-                    </td>
-                </tr>
-            @endforeach
+        <x-table :headers="$headers" :rows="$departments" sortable wire:loading.class="opacity-50">
+            @scope('cell_is_default', $department)
+                @if($department->is_default)
+                    <x-badge value="Default" color="success" />
+                @else
+                    <x-button size="xs" label="Set Default" 
+                            wire:click="setAsDefault({{ $department->id }})"
+                            wire:confirm="Are you sure you want to set this as the default category?"
+                            class="btn-outline btn-xs" />
+                @endif
+            @endscope
+
+            @scope('actions', $department)
+                <div class="flex gap-1">
+                    <x-button icon="o-eye" wire:click="view({{ $department->id }})" spinner class="btn-ghost btn-sm" title="View Details" />
+                    <x-button icon="o-pencil" wire:click="edit({{ $department->id }})" spinner class="btn-ghost btn-sm" title="Edit" />
+                    @unless($department->is_default)
+                        <x-button icon="o-trash" wire:click="delete({{ $department->id }})" 
+                            wire:confirm="Are you sure you want to delete this department?" 
+                            spinner class="btn-ghost btn-sm text-red-500" title="Delete" />
+                    @endunless
+                </div>
+            @endscope
         </x-table>
         
         <div class="mt-4">
@@ -322,24 +327,21 @@ new class extends Component {
     </x-modal>
     
     <!-- ADD/EDIT MODAL -->
-    <x-modal wire:model="addEditModal" title="{{ $editingId ? 'Edit' : 'Create' }} Department">
+    <x-modal wire:model="addEditModal" title="{{ $editingId ? 'Edit' : 'Add New' }} Department">
         <form wire:submit="save" class="space-y-4">
             <div>
                 <x-label for="name" value="Department Name" />
                 <x-input id="name" wire:model="name" placeholder="Enter department name" required />
-                @error('name') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
             </div>
             
             <div>
                 <x-label for="code" value="Department Code" />
                 <x-input id="code" wire:model="code" placeholder="Enter department code" required />
-                @error('code') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
             </div>
             
             <div>
                 <x-label for="description" value="Description" />
                 <x-textarea id="description" wire:model="description" placeholder="Enter description" />
-                @error('description') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
             </div>
         </form>
         

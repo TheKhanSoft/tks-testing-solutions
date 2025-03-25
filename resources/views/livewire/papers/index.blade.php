@@ -253,13 +253,8 @@ new class extends Component {
             'sort_dir' => $this->sort_dir,
         ];
         
-        // Use the service with eager loading to avoid N+1 problems
-        return $this->paperService->getPaginatedPapers(
-            $filters, 
-            15, 
-            ['*'], 
-            ['subject', 'paperCategory', 'questions']
-        );
+        // Pass the perPage value as first argument, then filters as second argument
+        return $this->paperService->getPaginatedPapers(15, $filters);
     }
     
     public function getViewingPaperProperty()
@@ -309,42 +304,41 @@ new class extends Component {
 
     <!-- TABLE  -->
     <x-card id="printable-table">
-        <x-table :headers="$headers" sortable wire:loading.class="opacity-50">
-            @foreach($papers as $paper)
-                <tr>
-                    <td>{{ $paper->id }}</td>
-                    <td>{{ $paper->name }}</td>
-                    <td>{{ $paper->subject->name ?? 'N/A' }}</td>
-                    <td>{{ $paper->paperCategory->name ?? 'N/A' }}</td>
-                    <td>{{ $paper->total_marks }}</td>
-                    <td>{{ $paper->duration_minutes }}</td>
-                    <td>
-                        <x-badge :value="$paper->status" 
-                                 :color="$paper->status === 'published' ? 'success' : ($paper->status === 'draft' ? 'warning' : 'neutral')" />
-                    </td>
-                    <td>{{ $paper->created_at->format('Y-m-d') }}</td>
-                    <td>
-                        <div class="flex gap-1">
-                            <x-button icon="o-eye" wire:click="view({{ $paper->id }})" spinner class="btn-ghost btn-sm" title="View Details" />
-                            <x-button icon="o-pencil" wire:click="edit({{ $paper->id }})" spinner class="btn-ghost btn-sm" title="Edit" />
-                            
-                            @if($paper->status === 'draft')
-                                <x-button icon="o-check-circle" wire:click="publish({{ $paper->id }})" 
-                                    wire:confirm="Are you sure you want to publish this paper?" 
-                                    spinner class="btn-ghost btn-sm text-green-500" title="Publish" />
-                            @elseif($paper->status === 'published')
-                                <x-button icon="o-archive-box" wire:click="archive({{ $paper->id }})" 
-                                    wire:confirm="Are you sure you want to archive this paper?" 
-                                    spinner class="btn-ghost btn-sm text-yellow-500" title="Archive" />
-                            @endif
-                            
-                            <x-button icon="o-trash" wire:click="delete({{ $paper->id }})" 
-                                wire:confirm="Are you sure you want to delete this paper?" 
-                                spinner class="btn-ghost btn-sm text-red-500" title="Delete" />
-                        </div>
-                    </td>
-                </tr>
-            @endforeach
+        <x-table :headers="$headers" :rows="$papers" sortable wire:loading.class="opacity-50">
+            @scope('cell_status', $paper)
+                <x-badge :value="$paper->status" 
+                         :color="$paper->status === 'published' ? 'success' : ($paper->status === 'draft' ? 'warning' : 'neutral')" />
+            @endscope
+
+            @scope('cell_total_marks', $paper)
+                {{ $paper->total_marks }}
+                <p class="text-xs text-gray-500">{{ $paper->duration_minutes }} min</p>
+            @endscope
+
+            @scope('cell_subject', $paper)
+                {{ $paper->subject->name ?? 'N/A' }}
+            @endscope
+
+            @scope('actions', $paper)
+                <div class="flex gap-1">
+                    <x-button icon="o-eye" wire:click="view({{ $paper->id }})" spinner class="btn-ghost btn-sm" title="View Details" />
+                    <x-button icon="o-pencil" wire:click="edit({{ $paper->id }})" spinner class="btn-ghost btn-sm" title="Edit" />
+                    
+                    @if($paper->status === 'draft')
+                        <x-button icon="o-check-circle" wire:click="publish({{ $paper->id }})" 
+                            wire:confirm="Are you sure you want to publish this paper?" 
+                            spinner class="btn-ghost btn-sm text-green-500" title="Publish" />
+                    @elseif($paper->status === 'published')
+                        <x-button icon="o-archive-box" wire:click="archive({{ $paper->id }})" 
+                            wire:confirm="Are you sure you want to archive this paper?" 
+                            spinner class="btn-ghost btn-sm text-yellow-500" title="Archive" />
+                    @endif
+                    
+                    <x-button icon="o-trash" wire:click="delete({{ $paper->id }})" 
+                        wire:confirm="Are you sure you want to delete this paper?" 
+                        spinner class="btn-ghost btn-sm text-red-500" title="Delete" />
+                </div>
+            @endscope
         </x-table>
         
         <div class="mt-4">

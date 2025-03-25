@@ -13,9 +13,11 @@ return new class extends Migration
     {
         Schema::create('subjects', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('department_id')->nullable()->constrained()->nullOnDelete();
             $table->string('name', 100)->unique();
             $table->string('code', 50)->unique();
             $table->text('description')->nullable();
+            $table->string('status')->default('active');
             $table->timestamps();
             $table->softDeletes();
         });

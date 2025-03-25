@@ -16,7 +16,7 @@ class Department extends Model
     // Relationships
     public function subjects()
     {
-        return $this->belongsToMany(Subject::class, 'department_subject');
+        return $this->belongsToMany(Subject::class, 'department_subjects');
     }
 
     public function facultyMembers()

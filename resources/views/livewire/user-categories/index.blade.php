@@ -233,37 +233,37 @@ new class extends Component {
 
     <!-- TABLE  -->
     <x-card id="printable-table">
-        <x-table :headers="$headers" sortable wire:loading.class="opacity-50">
-            @foreach($userCategories as $category)
-                <tr>
-                    <td>{{ $category->id }}</td>
-                    <td>{{ $category->name }}</td>
-                    <td>{{ Str::limit($category->description, 50) }}</td>
-                    <td>{{ $category->users_count }}</td>
-                    <td>
-                        @if($category->is_default)
-                            <x-badge value="Default" color="success" />
-                        @else
-                            <x-button size="xs" label="Set Default" 
-                                    wire:click="setAsDefault({{ $category->id }})"
-                                    wire:confirm="Are you sure you want to set this as the default category?"
-                                    class="btn-outline btn-xs" />
-                        @endif
-                    </td>
-                    <td>{{ $category->created_at->format('Y-m-d') }}</td>
-                    <td>
-                        <div class="flex gap-1">
-                            <x-button icon="o-eye" wire:click="view({{ $category->id }})" spinner class="btn-ghost btn-sm" title="View Details" />
-                            <x-button icon="o-pencil" wire:click="edit({{ $category->id }})" spinner class="btn-ghost btn-sm" title="Edit" />
-                            @unless($category->is_default)
-                                <x-button icon="o-trash" wire:click="delete({{ $category->id }})" 
-                                    wire:confirm="Are you sure you want to delete this category?" 
-                                    spinner class="btn-ghost btn-sm text-red-500" title="Delete" />
-                            @endunless
-                        </div>
-                    </td>
-                </tr>
-            @endforeach
+        <x-table :headers="$headers" :rows="$userCategories" sortable wire:loading.class="opacity-50">
+            @scope('cell_description', $category)
+                {{ Str::limit($category->description, 50) }}
+            @endscope
+
+            @scope('cell_is_default', $category)
+                @if($category->is_default)
+                    <x-badge value="Default" color="success" />
+                @else
+                    <x-button size="xs" label="Set Default" 
+                            wire:click="setAsDefault({{ $category->id }})"
+                            wire:confirm="Are you sure you want to set this as the default category?"
+                            class="btn-outline btn-xs" />
+                @endif
+            @endscope
+
+            @scope('cell_created_at', $category)
+                {{ $category->created_at->format('Y-m-d') }}
+            @endscope
+
+            @scope('actions', $category)
+                <div class="flex gap-1">
+                    <x-button icon="o-eye" wire:click="view({{ $category->id }})" spinner class="btn-ghost btn-sm" title="View Details" />
+                    <x-button icon="o-pencil" wire:click="edit({{ $category->id }})" spinner class="btn-ghost btn-sm" title="Edit" />
+                    @unless($category->is_default)
+                        <x-button icon="o-trash" wire:click="delete({{ $category->id }})" 
+                            wire:confirm="Are you sure you want to delete this category?" 
+                            spinner class="btn-ghost btn-sm text-red-500" title="Delete" />
+                    @endunless
+                </div>
+            @endscope
         </x-table>
         
         <div class="mt-4">

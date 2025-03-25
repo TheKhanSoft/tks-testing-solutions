@@ -186,7 +186,7 @@ new class extends Component {
             $filters, 
             15, 
             ['*'], 
-            ['departments'] // Eager load departments to avoid N+1 query issues
+            ['department'] // Eager load departments to avoid N+1 query issues
         );
     }
 
@@ -194,7 +194,7 @@ new class extends Component {
     {
         return [
             'subjects' => $this->subjects,
-            'departments' => $this->departments,
+            'department' => $this->department,
             'headers' => $this->headers()
         ];
     }
@@ -224,6 +224,10 @@ new class extends Component {
 
             @scope('cell_department', $subject)
                 {{ $subject->department->name ?? 'N/A' }}
+            @endscope
+
+            @scope('cell_description', $subject)
+                {{ Str::limit($subject->description, 50) }}
             @endscope
 
             @scope('actions', $subject)
@@ -263,11 +267,9 @@ new class extends Component {
             </div>
             
             <div>
-                <x-label for="department_id" value="Department" />
-                <x-select wire:model.live="department_id" placeholder="Select Department" clearable>
-                    @foreach($departments as $department)
-                        <x-select.option value="{{ $department->id }}" label="{{ $department->name }}" />
-                    @endforeach
+                <x-label for="department_id" />
+                <x-select wire:model.live="department_id" label="Department" placeholder="Select Department" clearable>
+                    
                 </x-select>
             </div>
             

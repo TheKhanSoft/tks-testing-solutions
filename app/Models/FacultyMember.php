@@ -29,7 +29,7 @@ class FacultyMember extends Authenticatable // Extending Laravel's User for Facu
 
     public function subjects()
     {
-        return $this->belongsToMany(Subject::class, 'subject_faculty');
+        return $this->belongsToMany(Subject::class, 'faculty_subjects');
     }
 
     // Scopes

@@ -198,46 +198,47 @@ new class extends Component {
 
     <!-- TABLE  -->
     <x-card id="printable-table">
-        <x-table :headers="$headers" sortable wire:loading.class="opacity-50">
-            @foreach($testAttempts as $testAttempt)
-                <tr>
-                    <td>{{ $testAttempt->id }}</td>
-                    <td>{{ $testAttempt->user->name ?? 'Unknown User' }}</td>
-                    <td>
-                        <div>
-                            <p>{{ $testAttempt->paper->name ?? 'Unknown Paper' }}</p>
-                            <p class="text-xs text-gray-500">{{ $testAttempt->paper->subject->name ?? '' }}</p>
-                        </div>
-                    </td>
-                    <td>
-                        @if($testAttempt->completed_at)
-                            {{ $testAttempt->score ?? 0 }}/{{ $testAttempt->paper->total_marks ?? 0 }}
-                            <p class="text-xs {{ $testAttempt->passed ? 'text-green-600' : 'text-red-600' }}">
-                                {{ $testAttempt->passed ? 'Passed' : 'Failed' }}
-                            </p>
-                        @else
-                            <span class="text-gray-500">In progress</span>
-                        @endif
-                    </td>
-                    <td>{{ $testAttempt->created_at->format('Y-m-d H:i') }}</td>
-                    <td>
-                        <x-badge :value="$testAttempt->completed_at ? 'Completed' : 'In Progress'" 
-                                 :color="$testAttempt->completed_at ? 'success' : 'warning'" />
-                    </td>
-                    <td>
-                        @if($testAttempt->completed_at)
-                            {{ $testAttempt->created_at->diffInMinutes($testAttempt->completed_at) }} min
-                        @else
-                            {{ $testAttempt->created_at->diffInMinutes(now()) }} min (ongoing)
-                        @endif
-                    </td>
-                    <td>
-                        <div class="flex gap-1">
-                            <x-button icon="o-eye" wire:click="view({{ $testAttempt->id }})" spinner class="btn-ghost btn-sm" title="View Details" />
-                        </div>
-                    </td>
-                </tr>
-            @endforeach
+        <x-table :headers="$headers" :rows="$testAttempts" sortable wire:loading.class="opacity-50">
+            @scope('cell_user', $testAttempt)
+                {{ $testAttempt->user->name ?? 'Unknown User' }}
+            @endscope
+
+            @scope('cell_paper', $testAttempt)
+                <div>
+                    <p>{{ $testAttempt->paper->name ?? 'Unknown Paper' }}</p>
+                    <p class="text-xs text-gray-500">{{ $testAttempt->paper->subject->name ?? '' }}</p>
+                </div>
+            @endscope
+
+            @scope('cell_score', $testAttempt)
+                @if($testAttempt->completed_at)
+                    {{ $testAttempt->score ?? 0 }}/{{ $testAttempt->paper->total_marks ?? 0 }}
+                    <p class="text-xs {{ $testAttempt->passed ? 'text-green-600' : 'text-red-600' }}">
+                        {{ $testAttempt->passed ? 'Passed' : 'Failed' }}
+                    </p>
+                @else
+                    <span class="text-gray-500">In progress</span>
+                @endif
+            @endscope
+
+            @scope('cell_completion_status', $testAttempt)
+                <x-badge :value="$testAttempt->completed_at ? 'Completed' : 'In Progress'" 
+                         :color="$testAttempt->completed_at ? 'success' : 'warning'" />
+            @endscope
+
+            @scope('cell_time_taken', $testAttempt)
+                @if($testAttempt->completed_at)
+                    {{ $testAttempt->created_at->diffInMinutes($testAttempt->completed_at) }} min
+                @else
+                    {{ $testAttempt->created_at->diffInMinutes(now()) }} min (ongoing)
+                @endif
+            @endscope
+
+            @scope('actions', $testAttempt)
+                <div class="flex gap-1">
+                    <x-button icon="o-eye" wire:click="view({{ $testAttempt->id }})" spinner class="btn-ghost btn-sm" title="View Details" />
+                </div>
+            @endscope
         </x-table>
         
         <div class="mt-4">

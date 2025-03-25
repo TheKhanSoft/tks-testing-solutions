@@ -4,19 +4,21 @@ use App\Models\Question;
 use App\Models\Subject;
 use App\Models\QuestionType;
 use App\Services\QuestionService;
+use App\Http\Requests\QuestionFormRequest;
 use Illuminate\Support\Collection;
 use Livewire\Volt\Component;
 use Livewire\WithPagination;
+use Livewire\WithoutUrlPagination;
 use Livewire\WithFileUploads;
 use Mary\Traits\Toast;
 
 new class extends Component {
-    use Toast, WithPagination, WithFileUploads;
+    use Toast, WithPagination, WithFileUploads, WithoutUrlPagination;
 
     public string $search = '';
-    public ?string $difficulty = null;
-    public ?int $subject_id = null;
-    public ?int $question_type_id = null;
+    public ?string $difficulty_level = null;
+    public $subject_id = null;
+    public $question_type_id = null;
     public string $sort_by = 'created_at';
     public string $sort_dir = 'desc';
     public bool $drawer = false;
@@ -31,7 +33,7 @@ new class extends Component {
     public $bulkActions = [
         'mark_as_active' => 'Mark as Active',
         'mark_as_inactive' => 'Mark as Inactive',
-        'change_difficulty' => 'Change Difficulty',
+        'change_difficulty_level' => 'Change Difficulty',
         'change_subject' => 'Change Subject',
         'change_type' => 'Change Type',
         'delete' => 'Delete'
@@ -40,24 +42,46 @@ new class extends Component {
     public $bulkSubject = null;
     public $bulkQuestionType = null;
     public $bulkDifficulty = null;
+    public bool $createModal = false;
+    public bool $editModal = false;
+    public $currentQuestion = null;
+    public bool $questionModal = false;
+    public $options = [];
+    public $newOption = ['text' => '', 'is_correct' => false];
+
+    public $id;
+    public $text;
+    public $marks;
+    public $description;
+    public $explanation;
+    public $image;
+    public $max_time_allowed;
+    public $negative_marks;
+    public $status;
+    public bool $isEditing = false;
+    protected $tempFilters = [];
     
-    protected $queryString = [
-        'search' => ['except' => ''],
-        'difficulty' => ['except' => null],
-        'subject_id' => ['except' => null],
-        'question_type_id' => ['except' => null],
-        'sort_by' => ['except' => 'created_at'],
-        'sort_dir' => ['except' => 'desc'],
-    ];
-    
-    public function mount(QuestionService $questionService) 
+
+    protected $queryString = [];  // Remove all query string parameters
+
+    // Add a method to handle URL cleanup
+    private function cleanUrl(): void 
     {
-        $this->questionService = $questionService;
+        $currentUrl = request()->url();
+        if (request()->getQueryString()) {
+            $this->dispatch('cleanUrl', ['url' => $currentUrl]);
+        }
+    }
+    
+    public function mount() 
+    {
+        $this->questionService = app(QuestionService::class);
+        $this->cleanUrl();
     }
     
     public function clear(): void
     {
-        $this->reset(['search', 'difficulty', 'subject_id', 'question_type_id', 'sort_by', 'sort_dir']);
+        $this->reset(['search', 'difficulty_level', 'subject_id', 'question_type_id', 'sort_by', 'sort_dir']);
         $this->resetPage();
         $this->success('Filters cleared.', position: 'toast-bottom');
     }
@@ -65,6 +89,13 @@ new class extends Component {
     public function view($id): void
     {
         $this->viewingId = $id;
+        $this->viewingQuestion = Question::with(['subject:id,name', 
+            'questionType:id,name',
+            'options', // Explicitly load options
+            'papers:id,title'
+        ])
+        ->withCount('papers')
+        ->findOrFail($id);
         $this->viewModal = true;
     }
     
@@ -78,6 +109,7 @@ new class extends Component {
     
     public function applyBulkAction(): void
     {
+        $this->questionService = app(QuestionService::class);
         if (empty($this->selectedQuestions)) {
             $this->error('No questions selected.', position: 'toast-bottom');
             return;
@@ -144,7 +176,7 @@ new class extends Component {
             $this->selectedBulkAction = null;
             $this->bulkSubject = null;
             $this->bulkQuestionType = null;
-            $this->bulkDifficulty = null;
+            $this->bulkdifficulty_level = null;
             
         } catch (\Exception $e) {
             $this->error('Error: ' . $e->getMessage(), position: 'toast-bottom');
@@ -155,15 +187,16 @@ new class extends Component {
     {
         try {
             $filters = [
-                'difficulty' => $this->difficulty,
+                'difficulty_level' => $this->difficulty_level,
                 'subject_id' => $this->subject_id,
                 'question_type_id' => $this->question_type_id,
                 'search' => $this->search,
                 'sort_by' => $this->sort_by,
                 'sort_dir' => $this->sort_dir,
             ];
-            
+            $this->questionService = app(QuestionService::class);
             $path = $this->questionService->exportQuestions($this->exportFormat, $filters);
+            
             $this->exportModal = false;
             $this->success('Export successful! Downloading...', position: 'toast-bottom');
             
@@ -176,20 +209,53 @@ new class extends Component {
     public function import(): void
     {
         try {
+            if (!$this->importFile) {
+                throw new \Exception('No file selected');
+            }
+
             $this->validate([
-                'importFile' => 'required|file|mimes:csv,xlsx|max:10240', // max 10MB
+                'importFile' => ['required', 'file', 'mimes:csv,xlsx', 'max:10240'],
+            ], [
+                'importFile.required' => 'Please select a file to import',
+                'importFile.file' => 'The upload must be a valid file',
+                'importFile.mimes' => 'The file must be a CSV or Excel file',
+                'importFile.max' => 'The file size must not exceed 10MB',
             ]);
+
+            $this->questionService = app(QuestionService::class);
+            $result = $this->questionService->importQuestions($this->importFile);
             
-            $result = $this->questionService->importQuestions($this->importFile->getRealPath());
+            // Ensure all required keys exist with default values
+            $result = array_merge([
+                'success' => false,
+                'count' => 0,
+                'processed' => 0,
+                'skipped' => 0,
+                'initialSuccessCount' => 0,
+                'finalSuccessCount' => 0,
+                'rowCount' => 0,
+                'errors' => [],
+                'error_count' => 0,
+                'error_log' => [],
+            ], $result ?: []);
+            
             $this->importModal = false;
             $this->reset('importFile');
             
             if ($result['success']) {
-                $this->success("Successfully imported {$result['count']} questions.", position: 'toast-bottom');
+                $this->success(
+                    "Import Completed Successfully!", 
+                    "<br />Awesome! The Import questions process completed successfully. <br />
+                    Total No. of Questions: <strong>{$result['rowCount']}</strong>,<br />
+                    Questions Imported: <strong>{$result['processed']}</strong>, <br />
+                    Questions Skipped: <strong>{$result['skipped']}</strong>.", 
+                    position: 'toast-top');
             } else {
-                $this->error("Import completed with errors. {$result['success_count']} imported, {$result['error_count']} failed.", position: 'toast-bottom');
+                $this->error(
+                    "Import completed with, {$result['processed']} imported, {$result['skipped']} skipped.", 
+                    position: 'toast-bottom'
+                );
                 
-                // Store error log for download
                 if (!empty($result['error_log'])) {
                     session(['import_error_log' => $result['error_log']]);
                     $this->dispatch('showErrorLogDownload');
@@ -205,14 +271,14 @@ new class extends Component {
         $this->dispatch('printTable');
     }
     
+    
     public function headers(): array
     {
         $headers = [
-            ['key' => 'id', 'label' => '#', 'sortable' => true],
             ['key' => 'text', 'label' => 'Question', 'sortable' => true],
             ['key' => 'type', 'label' => 'Type', 'sortable' => false],
             ['key' => 'subject', 'label' => 'Subject', 'sortable' => false],
-            ['key' => 'difficulty', 'label' => 'Difficulty', 'sortable' => true],
+            ['key' => 'difficulty_level', 'label' => 'Difficulty', 'sortable' => true],
             ['key' => 'marks', 'label' => 'Marks', 'sortable' => true],
             ['key' => 'status', 'label' => 'Status', 'sortable' => true]
         ];
@@ -248,7 +314,6 @@ new class extends Component {
     {
         return cache()->remember('subjects_list_for_questions', now()->addHour(), function() {
             return Subject::select(['id', 'name'])
-                ->where('status', 'active')
                 ->orderBy('name')
                 ->get();
         });
@@ -263,25 +328,65 @@ new class extends Component {
         });
     }
     
+    private function storeCurrentFilters(): void
+    {
+        $this->tempFilters = [
+            'search' => $this->search,
+            'difficulty_level' => $this->difficulty_level,
+            'subject_id' => $this->subject_id,
+            'question_type_id' => $this->question_type_id,
+            'sort_by' => $this->sort_by,
+            'sort_dir' => $this->sort_dir
+        ];
+    }
+
+    private function restoreFilters(): void
+    {
+        if (!empty($this->tempFilters)) {
+            $this->search = $this->tempFilters['search'];
+            $this->difficulty_level = $this->tempFilters['difficulty_level'];
+            $this->subject_id = $this->tempFilters['subject_id'];
+            $this->question_type_id = $this->tempFilters['question_type_id'];
+            $this->sort_by = $this->tempFilters['sort_by'];
+            $this->sort_dir = $this->tempFilters['sort_dir'];
+            $this->tempFilters = [];
+        }
+    }
+
+    private function clearFilters(): void
+    {
+        $this->reset([
+            'search',
+            'difficulty_level',
+            'subject_id',
+            'question_type_id',
+            'sort_by',
+            'sort_dir'
+        ]);
+    }
+
     public function getQuestionsProperty()
     {
-        return Question::with(['subject:id,name', 'questionType:id,name'])
-            ->when($this->search, function($query, $search) {
+        $query = Question::with(['subject:id,name', 'questionType:id,name']);
+
+        if (!$this->isEditing) {
+            $query->when($this->search, function($query, $search) {
                 return $query->where(function($q) use ($search) {
                     $q->where('text', 'like', "%{$search}%");
                 });
             })
-            ->when($this->difficulty, function($query, $difficulty) {
-                return $query->where('difficulty', $difficulty);
+            ->when($this->difficulty_level, function($query, $difficulty_level) {
+                return $query->where('difficulty_level', $difficulty_level);
             })
             ->when($this->subject_id, function($query, $subject_id) {
                 return $query->where('subject_id', $subject_id);
             })
             ->when($this->question_type_id, function($query, $question_type_id) {
                 return $query->where('question_type_id', $question_type_id);
-            })
-            ->orderBy($this->sort_by, $this->sort_dir)
-            ->paginate(15);
+            });
+        }
+
+        return $query->orderBy($this->sort_by, $this->sort_dir)->paginate(15);
     }
     
     public function getViewingQuestionProperty()
@@ -294,19 +399,44 @@ new class extends Component {
                 'subject:id,name', 
                 'questionType:id,name',
                 'options',
-                'papers:id,name'
+                'papers:id,title'
             ])
             ->withCount('papers')
             ->find($this->viewingId);
     }
     
-    public function getDifficultyLevelsProperty()
+  
+
+    public function getFormattedDifficultyLevelsProperty()
     {
         return [
-            'easy' => 'Easy',
-            'medium' => 'Medium',
-            'hard' => 'Hard'
+            ['id' => 'easy', 'name' => 'Easy'],
+            ['id' => 'medium', 'name' => 'Medium'],
+            ['id' => 'hard', 'name' => 'Hard'],
+            ['id' => 'very_hard', 'name' => 'Very Hard'],
+            ['id' => 'expert', 'name' => 'Expert'],
+
         ];
+    }
+
+    public function getFormattedSubjectsProperty()
+    {
+        return $this->subjects->map(function($subject) {
+            return [
+                'id' => (string) $subject->id,
+                'name' => $subject->name ?? $subject->title
+            ];
+        })->toArray();
+    }
+
+    public function getFormattedQuestionTypesProperty()
+    {
+        return $this->questionTypes->map(function($type) {
+            return [
+                'id' => (string) $type->id,
+                'name' => $type->name
+            ];
+        })->toArray();
     }
 
     public function with(): array
@@ -316,9 +446,175 @@ new class extends Component {
             'subjects' => $this->subjects,
             'questionTypes' => $this->questionTypes,
             'viewingQuestion' => $this->viewingQuestion,
-            'difficultyLevels' => $this->difficultyLevels,
+            'formattedDifficultyLevels' => $this->formattedDifficultyLevels,
+            'formattedSubjects' => $this->formattedSubjects,
+            'formattedQuestionTypes' => $this->formattedQuestionTypes,
             'headers' => $this->headers()
         ];
+    }
+
+    public function create()
+    {
+        $this->isEditing = true;
+        $this->cleanUrl();
+        $this->storeCurrentFilters();
+        $this->clearFilters();
+        
+        $this->questionService = app(QuestionService::class);
+        $this->resetValidation();
+        $this->reset(['id', 'text', 'subject_id', 'question_type_id', 'difficulty_level', 
+                     'marks', 'status', 'description', 'explanation', 'image', 
+                     'max_time_allowed', 'negative_marks', 'options']);
+        
+        // Set defaults without affecting filters
+        $this->marks = 1;
+        $this->status = 'active';
+        $this->questionModal = true;
+    }
+    
+    public function edit(Question $question)
+    {
+        $this->isEditing = true;
+        $this->cleanUrl();
+        $this->storeCurrentFilters();
+        $this->clearFilters();
+        
+        $this->questionService = app(QuestionService::class);
+        $this->resetValidation();
+        $this->viewModal = false; // Close view modal if it's open
+        
+        // Reset filter parameters when editing
+        $this->difficulty_level = null;
+        $this->subject_id = null;
+        $this->question_type_id = null;
+        
+        // First load the question with its options
+        $question = $question->load('options');
+        
+        // Reset question fields first to avoid carrying over data
+        $this->reset(['id', 'text', 'subject_id', 'question_type_id', 'difficulty_level', 
+                     'marks', 'status', 'description', 'explanation', 'image', 
+                     'max_time_allowed', 'negative_marks', 'options']);
+        
+        // Fill the form with question data
+        $this->id = $question->id;
+        $this->text = $question->text;
+        $this->subject_id = $question->subject_id;
+        $this->question_type_id = $question->question_type_id;
+        $this->difficulty_level = $question->difficulty_level;
+        $this->marks = $question->marks;
+        $this->status = $question->status;
+        $this->description = $question->description;
+        $this->explanation = $question->explanation;
+        $this->max_time_allowed = $question->max_time_allowed;
+        $this->negative_marks = $question->negative_marks;
+        
+        // Format options data properly
+        $this->options = $question->options->map(function($option) {
+            return [
+                'id' => $option->id,
+                'text' => $option->text,
+                'is_correct' => (bool) $option->is_correct
+            ];
+        })->toArray();
+        
+        $this->questionModal = true;
+    }
+
+    public function saveQuestion()
+    {
+        $this->questionService = app(QuestionService::class);
+        
+        $questionRequest = new QuestionFormRequest();
+        $rules = collect($questionRequest->rules())->mapWithKeys(function ($rule, $key) {
+            return ["{$key}" => $rule];
+        })->toArray();
+        
+        // Ensure options have their IDs when updating
+        //dd($this->options);
+        
+        // Validate using the mapped rules
+        $validated = $this->validate($rules, $questionRequest->messages());
+
+        try {
+            if (!isset($this->id)) {
+                $this->questionService->createQuestion($validated);
+                $message = 'Question created successfully!';
+            } else {
+                $question = $this->questionService->getQuestionById($this->id);
+                $this->questionService->updateQuestion($question, $validated);
+                $message = 'Question updated successfully!';
+            }
+            
+            $this->questionModal = false;
+            $this->reset(['id', 'text', 'subject_id', 'question_type_id', 'difficulty_level', 
+                         'marks', 'status', 'description', 'explanation', 'image', 
+                         'max_time_allowed', 'negative_marks', 'options', 'questionModal']);
+            $this->success($message, position: 'toast-bottom');
+        } catch (\Exception $e) {
+            $this->error('Error: ' . $e->getMessage(), position: 'toast-bottom');
+        }
+    }
+
+    public function shouldShowOptions(): bool
+    {
+        $this->questionService = app(QuestionService::class);
+        return $this->question_type_id && 
+               $this->questionService->shouldShowOptions($this->question_type_id);
+    }
+
+    public function addOption()
+    {
+        if (!empty($this->newOption['text'])) {
+            if (!isset($this->options)) {
+                $this->options = [];
+            }
+            $this->options[] = [
+                'text' => $this->newOption['text'],
+                'is_correct' => $this->newOption['is_correct']
+            ];
+            $this->newOption = ['text' => '', 'is_correct' => false];
+        }
+    }
+
+    public function removeOption($index)
+    {
+        unset($this->options[$index]);
+        $this->options = array_values($this->options);
+    }
+
+    public function delete(Question $question): void
+    {
+        try {
+            $this->questionService = app(QuestionService::class);
+            $this->questionService->deleteQuestion($question);
+            $this->success('Question deleted successfully.', position: 'toast-bottom');
+        } catch (\Exception $e) {
+            $this->error('Error: ' . $e->getMessage(), position: 'toast-bottom');
+        }
+    }
+
+    public function updatedDrawer()
+    {
+        if (!$this->drawer) {
+            $this->cleanUrl();
+        }
+    }
+
+    public function updatedQuestionModal()
+    {
+        if (!$this->questionModal) {
+            $this->isEditing = false;
+            $this->cleanUrl();
+            $this->restoreFilters();
+        }
+    }
+
+    public function updatedViewModal()
+    {
+        if (!$this->viewModal) {
+            $this->cleanUrl();
+        }
     }
 }; ?>
 
@@ -336,7 +632,12 @@ new class extends Component {
             <x-button label="{{ $bulkEditMode ? 'Exit Bulk Edit' : 'Bulk Edit' }}" wire:click="toggleBulkEditMode" 
                     responsive icon="{{ $bulkEditMode ? 'o-x-mark' : 'o-check-circle' }}" 
                     class="{{ $bulkEditMode ? 'btn-error' : 'btn-info' }}" />
-            <x-button label="Create Question" href="{{ route('questions.create') }}" responsive icon="o-plus" class="btn-primary" />
+            <x-button 
+                label="Create Question" 
+                wire:click="create" 
+                responsive 
+                icon="o-plus" 
+                class="btn-primary" />
         </x-slot:actions>
     </x-header>
 
@@ -345,34 +646,37 @@ new class extends Component {
         <div class="bg-base-200 p-4 rounded-lg mb-4 flex flex-wrap items-center gap-3">
             <div class="font-medium">Bulk Actions:</div>
             <div class="flex-1 flex flex-wrap gap-2 items-center">
-                <x-select wire:model="selectedBulkAction" placeholder="Select Action" class="max-w-xs">
-                    @foreach($bulkActions as $value => $label)
-                        <x-select.option :value="$value" :label="$label" />
-                    @endforeach
-                </x-select>
+                <x-select wire:model="selectedBulkAction" 
+                         placeholder="Select Action" 
+                         :options="[
+                            ['id' => 'mark_as_active', 'name' => 'Mark as Active'],
+                            ['id' => 'mark_as_inactive', 'name' => 'Mark as Inactive'],
+                            ['id' => 'change_difficulty', 'name' => 'Change Difficulty'],
+                            ['id' => 'change_subject', 'name' => 'Change Subject'],
+                            ['id' => 'change_type', 'name' => 'Change Type'],
+                            ['id' => 'delete', 'name' => 'Delete']
+                         ]" 
+                         class="max-w-xs" />
                 
                 @if($selectedBulkAction === 'change_difficulty')
-                    <x-select wire:model="bulkDifficulty" placeholder="Select Difficulty" class="max-w-xs">
-                        @foreach($difficultyLevels as $value => $label)
-                            <x-select.option :value="$value" :label="$label" />
-                        @endforeach
-                    </x-select>
+                    <x-select wire:model="bulkDifficulty" 
+                             placeholder="Select Difficulty" 
+                             :options="$formattedDifficultyLevels" 
+                             class="max-w-xs" />
                 @endif
                 
                 @if($selectedBulkAction === 'change_subject')
-                    <x-select wire:model="bulkSubject" placeholder="Select Subject" class="max-w-xs">
-                        @foreach($subjects as $subject)
-                            <x-select.option :value="$subject->id" :label="$subject->name" />
-                        @endforeach
-                    </x-select>
+                    <x-select wire:model="bulkSubject" 
+                             placeholder="Select Subject" 
+                             :options="$formattedSubjects" 
+                             class="max-w-xs" />
                 @endif
                 
                 @if($selectedBulkAction === 'change_type')
-                    <x-select wire:model="bulkQuestionType" placeholder="Select Question Type" class="max-w-xs">
-                        @foreach($questionTypes as $type)
-                            <x-select.option :value="$type->id" :label="$type->name" />
-                        @endforeach
-                    </x-select>
+                    <x-select wire:model="bulkQuestionType" 
+                             placeholder="Select Question Type" 
+                             :options="$formattedQuestionTypes" 
+                             class="max-w-xs" />
                 @endif
                 
                 <x-button label="Apply" wire:click="applyBulkAction" 
@@ -396,40 +700,51 @@ new class extends Component {
 
     <!-- TABLE  -->
     <x-card id="printable-table">
-        <x-table :headers="$headers" sortable wire:loading.class="opacity-50">
-            @foreach($questions as $question)
-                <tr>
-                    @if($bulkEditMode)
-                        <td>
-                            <x-checkbox wire:model.live="selectedQuestions" value="{{ $question->id }}" />
-                        </td>
-                    @endif
-                    <td>{{ $question->id }}</td>
-                    <td>
-                        <div class="max-w-sm">
-                            {{ Str::limit(strip_tags($question->text), 80) }}
-                        </div>
-                    </td>
-                    <td>{{ $question->questionType->name ?? 'N/A' }}</td>
-                    <td>{{ $question->subject->name ?? 'N/A' }}</td>
-                    <td>
-                        <x-badge :value="ucfirst($question->difficulty)" 
-                                :color="$question->difficulty === 'easy' ? 'success' : ($question->difficulty === 'medium' ? 'warning' : 'error')" />
-                    </td>
-                    <td>{{ $question->marks }}</td>
-                    <td>
-                        <x-badge :value="$question->status" 
-                                :color="$question->status === 'active' ? 'success' : 'warning'" />
-                    </td>
-                    <td>
-                        <div class="flex gap-1">
-                            <x-button icon="o-eye" wire:click="view({{ $question->id }})" spinner class="btn-ghost btn-sm" title="View Details" />
-                            <x-button icon="o-pencil" href="{{ route('questions.edit', $question->id) }}" class="btn-ghost btn-sm" title="Edit" />
-                            <x-button icon="o-trash" wire:click="$dispatch('openModal', { component: 'modals.delete-question', arguments: { questionId: {{ $question->id }} }})" spinner class="btn-ghost btn-sm text-red-500" title="Delete" />
-                        </div>
-                    </td>
-                </tr>
-            @endforeach
+        <x-table :headers="$headers" :rows="$questions" sortable wire:loading.class="opacity-50">
+            @scope('cell_text', $question)
+                <div class="max-w-sm">
+                    {{ Str::limit(strip_tags($question->text), 80) }}
+                </div>
+            @endscope
+
+            @scope('cell_type', $question)
+                {{ $question->questionType->name ?? 'N/A' }}
+            @endscope
+
+            @scope('cell_subject', $question)
+                {{ $question->subject->name ?? 'N/A' }}
+            @endscope
+
+            @scope('cell_difficulty_level', $question)
+                <x-badge :value="ucfirst($question->difficulty_level)" 
+                        :color="$question->difficulty_level === 'easy' ? 'success' : ($question->difficulty_level === 'medium' ? 'warning' : 'error')" />
+            @endscope
+
+            @scope('cell_status', $question)
+                <x-badge :value="$question->status" 
+                        :color="$question->status === 'active' ? 'success' : 'warning'" />
+            @endscope
+
+            @if($bulkEditMode)
+                @scope('cell_select', $question)
+                    <x-checkbox wire:model.live="selectedQuestions" value="{{ $question->id }}" />
+                @endscope
+            @endif
+
+            @scope('actions', $question)
+                <div class="flex gap-1">
+                    <x-button icon="o-eye" wire:click="view({{ $question->id }})" spinner class="btn-ghost btn-sm" title="View Details" />
+                    <x-button icon="o-pencil" 
+                        wire:click="edit({{ $question->id }})"
+                        spinner
+                        class="btn-ghost btn-sm" title="Edit" />
+                    <x-button icon="o-trash" 
+                        wire:click="delete({{ $question->id }})" 
+                        wire:confirm="Are you sure you want to delete this question?"
+                        spinner
+                        class="btn-ghost btn-sm text-red-500" title="Delete" />
+                </div>
+            @endscope
         </x-table>
         
         <div class="mt-4">
@@ -443,45 +758,51 @@ new class extends Component {
             <x-input placeholder="Search..." wire:model.live.debounce="search" icon="o-magnifying-glass" />
             
             <div>
-                <x-label for="difficulty" value="Difficulty" />
-                <x-select wire:model.live="difficulty" placeholder="Select Difficulty" clearable>
-                    @foreach($difficultyLevels as $value => $label)
-                        <x-select.option :value="$value" :label="$label" />
-                    @endforeach
-                </x-select>
+                <x-select 
+                    lable="Difficulty Level"
+                    wire:model.live="difficulty_level" 
+                    placeholder="Select Difficulty Level"
+                    :options="$formattedDifficultyLevels"
+                    clearable />
             </div>
             
             <div>
-                <x-label for="subject_id" value="Subject" />
-                <x-select wire:model.live="subject_id" placeholder="Select Subject" clearable>
-                    @foreach($subjects as $subject)
-                        <x-select.option value="{{ $subject->id }}" label="{{ $subject->name }}" />
-                    @endforeach
-                </x-select>
+                <x-select 
+                    label="Subject"
+                    wire:model.live="subject_id" 
+                    placeholder="Select Subject" 
+                    :options="$formattedSubjects"
+                    clearable 
+                />
             </div>
             
             <div>
-                <x-label for="question_type_id" value="Question Type" />
-                <x-select wire:model.live="question_type_id" placeholder="Select Question Type" clearable>
-                    @foreach($questionTypes as $type)
-                        <x-select.option value="{{ $type->id }}" label="{{ $type->name }}" />
-                    @endforeach
-                </x-select>
+                <x-select 
+                    label="Question Type" 
+                    wire:model.live="question_type_id" 
+                    placeholder="Select Question Type" 
+                    :options="$formattedQuestionTypes"
+                    clearable 
+                />
             </div>
             
             <div>
                 <x-label for="sort_by" value="Sort By" />
                 <div class="flex gap-2">
-                    <x-select wire:model.live="sort_by" class="flex-1">
-                        <x-select.option value="created_at" label="Date Created" />
-                        <x-select.option value="text" label="Question Text" />
-                        <x-select.option value="difficulty" label="Difficulty" />
-                        <x-select.option value="marks" label="Marks" />
-                    </x-select>
-                    <x-select wire:model.live="sort_dir" class="w-1/3">
-                        <x-select.option value="asc" label="Asc" />
-                        <x-select.option value="desc" label="Desc" />
-                    </x-select>
+                    <x-select wire:model.live="sort_by" 
+                             :options="[
+                                ['id' => 'created_at', 'name' => 'Date Created'],
+                                ['id' => 'text', 'name' => 'Question Text'],
+                                ['id' => 'difficulty_level', 'name' => 'Difficulty Level'],
+                                ['id' => 'marks', 'name' => 'Marks']
+                             ]" 
+                             class="flex-1" />
+                    <x-select wire:model.live="sort_dir" 
+                             :options="[
+                                ['id' => 'asc', 'name' => 'Ascending'],
+                                ['id' => 'desc', 'name' => 'Descending']
+                             ]" 
+                             class="w-1/3" />
                 </div>
             </div>
         </div>
@@ -496,11 +817,12 @@ new class extends Component {
     <x-modal wire:model="exportModal" title="Export Questions">
         <div class="mb-4">
             <x-label for="exportFormat" value="Select Format" />
-            <x-select wire:model="exportFormat">
-                <x-select.option value="pdf" label="PDF" />
-                <x-select.option value="xlsx" label="Excel (XLSX)" />
-                <x-select.option value="csv" label="CSV" />
-            </x-select>
+            <x-select wire:model="exportFormat" 
+                     :options="[
+                        ['id' => 'PDF', 'name' => 'pdf'],
+                        ['id' => 'Excel (XLSX)', 'name' => 'xlsx'],
+                        ['id' => 'CSV', 'name' => 'csv']
+                     ]" />
             
             <p class="text-sm text-gray-500 mt-2">
                 Note: The export will include current filters and sorting.
@@ -515,11 +837,17 @@ new class extends Component {
     
     <!-- IMPORT MODAL -->
     <x-modal wire:model="importModal" title="Import Questions">
-        <form wire:submit="import">
+        <form wire:submit.prevent="import">
             <div class="mb-4">
                 <x-label for="importFile" value="Upload File" />
-                <input type="file" wire:model="importFile" class="w-full border border-gray-300 rounded p-2" accept=".xlsx,.csv" />
-                @error('importFile') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
+                <input type="file" 
+                       id="importFile"
+                       wire:model.live="importFile" 
+                       class="w-full border border-gray-300 rounded p-2" 
+                       accept=".xlsx,.csv" />
+                @error('importFile') 
+                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p> 
+                @enderror
                 
                 <p class="text-sm text-gray-500 mt-4">
                     <strong>Accepted formats:</strong> CSV, XLSX<br>
@@ -532,16 +860,21 @@ new class extends Component {
                     </a>
                 </p>
             </div>
-        
             <x-slot:actions>
                 <x-button label="Cancel" @click="$wire.importModal = false" />
-                <x-button type="submit" label="Import" spinner class="btn-primary" />
+                
+                <x-button type="submit" 
+                         label="Import" 
+                         class="btn-primary" 
+                         wire:click.prevent="import" 
+                         :disabled="!$importFile"
+                         spinner />
             </x-slot:actions>
         </form>
     </x-modal>
     
     <!-- VIEW MODAL -->
-    <x-modal wire:model="viewModal" title="Question Details" size="2xl">
+    <x-modal wire:model="viewModal" title="Question Details" size="xl">
         @if($viewingQuestion)
             <div class="space-y-6">
                 <!-- Question text -->
@@ -563,9 +896,9 @@ new class extends Component {
                         <p class="font-medium">{{ $viewingQuestion->subject->name }}</p>
                     </div>
                     <div>
-                        <p class="text-sm text-gray-500">Difficulty</p>
-                        <x-badge :value="ucfirst($viewingQuestion->difficulty)" 
-                                :color="$viewingQuestion->difficulty === 'easy' ? 'success' : ($viewingQuestion->difficulty === 'medium' ? 'warning' : 'error')" />
+                        <p class="text-sm text-gray-500">Difficulty Level</p>
+                        <x-badge :value="ucfirst($viewingQuestion->difficulty_level)" 
+                                :color="$viewingQuestion->difficulty_level === 'easy' ? 'success' : ($viewingQuestion->difficulty_level === 'medium' ? 'warning' : 'error')" />
                     </div>
                 </div>
                 
@@ -591,14 +924,16 @@ new class extends Component {
                         <h3 class="text-lg font-medium mb-2">Answer Options</h3>
                         <div class="space-y-2">
                             @foreach($viewingQuestion->options as $option)
-                                <div class="flex items-start p-2 {{ $option->is_correct ? 'bg-green-50 border border-green-200' : 'bg-gray-50' }} rounded-md">
+                                <div class="flex items-start p-2 {{ $option->is_correct ? 'bg-green-50 border border-green-200' : 'bg-red-100' }} rounded-md">
                                     <div class="mr-3 flex-shrink-0 mt-0.5">
                                         @if($option->is_correct)
                                             <svg class="h-5 w-5 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                                             </svg>
                                         @else
-                                            <span class="inline-block h-5 w-5 rounded-full bg-gray-200"></span>
+                                            <svg class="h-5 w-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                            </svg>
                                         @endif
                                     </div>
                                     <div class="flex-1">
@@ -616,56 +951,185 @@ new class extends Component {
                         <h3 class="text-lg font-medium mb-2">Used in Papers</h3>
                         <ul class="list-disc pl-5 space-y-1">
                             @foreach($viewingQuestion->papers as $paper)
-                                <li>{{ $paper->name }}</li>
+                                <li>{{ $paper->title }}</li>
                             @endforeach
                         </ul>
                     </div>
                 @endif
             </div>
+            
+            <x-slot:actions>
+                <x-button label="Close" @click="$wire.viewModal = false" />
+                @if($viewingQuestion)
+                    <x-button label="Edit" wire:click="edit({{ $viewingQuestion->id }})" spinner class="btn-primary" />
+                @endif
+            </x-slot:actions>
         @endif
-        
-        <x-slot:actions>
-            <x-button label="Close" @click="$wire.viewModal = false" />
-            <x-button label="Edit" href="{{ route('questions.edit', $viewingId) }}" class="btn-primary" />
-        </x-slot:actions>
     </x-modal>
 
-    <script>
-        document.addEventListener('livewire:initialized', () => {
-            @this.on('triggerDownload', (data) => {
-                window.open(data.url, '_blank');
-            });
-            
-            @this.on('printTable', () => {
-                const printContents = document.getElementById('printable-table').innerHTML;
-                const originalContents = document.body.innerHTML;
-                
-                document.body.innerHTML = `
-                    <div class="print-container">
-                        <h1 class="text-center text-xl font-bold mb-4">Questions List</h1>
-                        ${printContents}
+    <!-- Create and edit modals with a single modal -->
+    <x-modal wire:model="questionModal" title="{{ isset($id) ? 'Edit Question' : 'Add New Question' }}">
+        <form wire:submit.prevent="saveQuestion">
+            <div class="space-y-6">
+                <div>
+                    <x-textarea wire:model="text"  icon="o-chat-bubble-bottom-center-text" label="Question Text" placeholder="Enter question text" required />
+                </div>
+
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div>
+                        <x-select 
+                            label="Subject"
+                            wire:model="subject_id"
+                            :options="$formattedSubjects"
+                            placeholder="Select Subject" 
+                            required
+                        />
                     </div>
-                `;
+
+                    <div>
+                        <x-select label="Question Type" 
+                            wire:model="question_type_id"
+                            :options="$formattedQuestionTypes"
+                            placeholder="Select Question Type"
+                            @change="$wire.shouldShowOptions"
+                            required
+                        />                       
+                    </div>
+
+                    <div>
+                        <x-select label="Difficulty Level"
+                            wire:model="difficulty_level"
+                            :options="$formattedDifficultyLevels"
+                            required
+                        />
+                    </div>
+
+                    <div>
+                        <x-input type="number" label="Marks" wire:model="marks" min="1" placeholder="Marks" required />
+                    </div>
+
+                    <div>
+                        <x-select 
+                            label="Status"
+                            wire:model="status"
+                            :options="[
+                                ['id' => 'active', 'name' => 'Active'],
+                                ['id' => 'inactive', 'name' => 'Inactive']
+                            ]"
+                            required
+                        />
+                    </div>
+                </div>
                 
-                window.print();
-                document.body.innerHTML = originalContents;
-                @this.dispatch('livewire:initialized');
-            });
+                <!-- Only show options section for multiple choice questions -->
+                @if($this->shouldShowOptions())
+                    <!-- Options Section -->
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <x-label value="Answer Options" />
+                            <x-button size="sm" @click="$wire.options = []" icon="o-trash" class="btn-ghost" tooltip-left="Clear All Options" />
+                        </div>
+                        
+                        <!-- Existing Options -->
+                        <div class="space-y-2 mb-4">>
+                            @foreach($options as $index => $option)
+                                <div class="flex gap-2 items-start p-2 bg-gray-50 rounded-md">
+                                    <x-checkbox wire:model="options.{{ $index }}.is_correct" />
+                                    <div class="flex-1">
+                                        <x-textarea wire:model="options.{{ $index }}.text" placeholder="Option text" rows="1" />
+                                    </div>
+                                    <x-button @click="$wire.removeOption({{ $index }})" icon="o-x-mark" class="btn-ghost btn-sm mt-2" />
+                                </div>
+                            @endforeach
+                        </div>
+                        
+                        <!-- Add New Option -->
+                        <div class="flex gap-2 items-start">
+                            <x-checkbox wire:model="newOption.is_correct" title="Mark as correct answer" />
+                            <div class="flex-1">
+                                <x-textarea wire:model="newOption.text" placeholder="Add new option" rows="1" />
+                            </div>
+                            <x-button @click="$wire.addOption()" icon="o-plus" class="btn-primary btn-sm mt-2" />
+                        </div>
+                    </div>
+                @endif
+            </div>
             
-            @this.on('showErrorLogDownload', () => {
-                Swal.fire({
-                    title: 'Import Completed with Errors',
-                    text: 'Some records could not be imported. Would you like to download the error log?',
-                    icon: 'warning',
-                    showCancelButton: true,
-                    confirmButtonText: 'Download Error Log',
-                    cancelButtonText: 'Close'
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        window.location.href = '{{ route("questions.download-error-log") }}';
-                    }
+            <x-slot:actions>
+                <x-button label="Cancel" @click="$wire.questionModal = false" />
+                <x-button label="{{ isset($id) ? 'Update' : 'Create' }}" type="submit" @click="$wire.saveQuestion()" class="btn-primary" spinner />
+            </x-slot:actions>
+        </form>
+    </x-modal>
+</div>
+
+<script>
+    document.addEventListener('livewire:initialized', () => {
+        @this.on('triggerDownload', (data) => {
+            if (!data[0].url) {
+                console.error('No URL provided for download');
+                return;
+            }
+
+            let url = data[0].url;
+            let filename = url.split('/').pop();
+            
+            fetch(url)
+                .then(response => response.blob())
+                .then(blob => {
+                    const blobUrl = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = blobUrl;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(blobUrl);
+                    document.body.removeChild(a);
+                })
+                .catch(error => {
+                    console.error('Download failed:', error);
                 });
+        });
+
+        @this.on('printTable', () => {
+            const printContents = document.getElementById('printable-table').innerHTML;
+            const originalContents = document.body.innerHTML;
+
+            document.body.innerHTML = `
+                <div class="print-container">
+                    <h1 class="text-center text-xl font-bold mb-4">Questions List</h1>
+                    ${printContents}
+                </div>
+            `;
+
+            window.print();
+            document.body.innerHTML = originalContents;
+            @this.dispatch('livewire:initialized');
+        });
+
+        @this.on('showErrorLogDownload', () => {
+            Swal.fire({
+                title: 'Import Completed with Errors',
+                text: 'Some records could not be imported. Would you like to download the error log?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Download Error Log',
+                cancelButtonText: 'Close'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '{{ route("questions.download-error-log") }}';
+                }
             });
         });
-    </script>
-</div>
+
+        @this.on('refreshQuestions', () => {
+            @this.dispatch('$refresh');
+        });
+
+        @this.on('cleanUrl', (data) => {
+            if (data[0].url) {
+                window.history.replaceState(null, '', data[0].url);
+            }
+        });
+    });
+</script>

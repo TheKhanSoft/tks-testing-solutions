@@ -403,73 +403,65 @@ new class extends Component {
         <x-card>
             <h3 class="font-medium text-lg mb-4">Recent Test Attempts</h3>
             <div class="overflow-x-auto">
-                <table class="table table-compact w-full">
-                    <thead>
-                        <tr>
-                            <th>User</th>
-                            <th>Paper</th>
-                            <th>Date</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($recentTestAttempts as $attempt)
-                            <tr>
-                                <td class="whitespace-nowrap">{{ $attempt->user->name }}</td>
-                                <td class="whitespace-nowrap max-w-[200px] truncate">{{ $attempt->paper->name }}</td>
-                                <td class="whitespace-nowrap">{{ $attempt->created_at->format('M d, H:i') }}</td>
-                                <td>
-                                    @if($attempt->completed_at)
-                                        <x-badge value="{{ $attempt->passed ? 'Passed' : 'Failed' }}" color="{{ $attempt->passed ? 'success' : 'error' }}" />
-                                    @else
-                                        <x-badge value="In Progress" color="warning" />
-                                    @endif
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="4" class="text-center py-4">No recent test attempts</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+                <x-table :headers="[
+                    ['key' => 'user', 'label' => 'User', 'sortable' => false],
+                    ['key' => 'paper', 'label' => 'Paper', 'sortable' => false],
+                    ['key' => 'date', 'label' => 'Date', 'sortable' => false],
+                    ['key' => 'status', 'label' => 'Status', 'sortable' => false]
+                ]" :rows="$recentTestAttempts" sortable wire:loading.class="opacity-50">
+                    
+                    @scope('cell_user', $attempt)
+                        {{ $attempt->user->name }}
+                    @endscope
+
+                    @scope('cell_paper', $attempt)
+                        <div class="whitespace-nowrap max-w-[200px] truncate">
+                            {{ $attempt->paper->name }}
+                        </div>
+                    @endscope
+
+                    @scope('cell_date', $attempt)
+                        {{ $attempt->created_at->format('M d, H:i') }}
+                    @endscope
+
+                    @scope('cell_status', $attempt)
+                        @if($attempt->completed_at)
+                            <x-badge :value="$attempt->passed ? 'Passed' : 'Failed'" 
+                                    :color="$attempt->passed ? 'success' : 'error'" />
+                        @else
+                            <x-badge value="In Progress" color="warning" />
+                        @endif
+                    @endscope
+                </x-table>
             </div>
         </x-card>
-        
+
         <x-card>
             <h3 class="font-medium text-lg mb-4">Top Performing Users</h3>
             <div class="overflow-x-auto">
-                <table class="table table-compact w-full">
-                    <thead>
-                        <tr>
-                            <th>User</th>
-                            <th class="text-center">Tests</th>
-                            <th class="text-center">Avg. Score</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @forelse($topPerformingUsers as $user)
-                            <tr>
-                                <td class="whitespace-nowrap">
-                                    <div>
-                                        <div class="font-medium">{{ $user->name }}</div>
-                                        <div class="text-xs text-gray-500">{{ $user->email }}</div>
-                                    </div>
-                                </td>
-                                <td class="text-center">{{ $user->attempt_count }}</td>
-                                <td class="text-center">
-                                    <div class="font-medium {{ $user->avg_score >= 70 ? 'text-green-600' : ($user->avg_score >= 40 ? 'text-amber-600' : 'text-red-600') }}">
-                                        {{ round($user->avg_score, 1) }}%
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="3" class="text-center py-4">No data available</td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+                <x-table :headers="[
+                    ['key' => 'user', 'label' => 'User', 'sortable' => false],
+                    ['key' => 'tests', 'label' => 'Tests', 'sortable' => false],
+                    ['key' => 'score', 'label' => 'Avg. Score', 'sortable' => false]
+                ]" :rows="$topPerformingUsers" sortable wire:loading.class="opacity-50">
+                    
+                    @scope('cell_user', $user)
+                        <div>
+                            <div class="font-medium">{{ $user->name }}</div>
+                            <div class="text-xs text-gray-500">{{ $user->email }}</div>
+                        </div>
+                    @endscope
+
+                    @scope('cell_tests', $user)
+                        <div class="text-center">{{ $user->attempt_count }}</div>
+                    @endscope
+
+                    @scope('cell_score', $user)
+                        <div class="text-center font-medium {{ $user->avg_score >= 70 ? 'text-green-600' : ($user->avg_score >= 40 ? 'text-amber-600' : 'text-red-600') }}">
+                            {{ round($user->avg_score, 1) }}%
+                        </div>
+                    @endscope
+                </x-table>
             </div>
         </x-card>
     </div>

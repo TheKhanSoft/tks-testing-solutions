@@ -9,74 +9,41 @@ new class extends Component {
     use Toast;
 
     public string $search = '';
-
+    public ?string $role = null;
+    public string $sort_by = 'name';
+    public string $sort_dir = 'asc';
     public bool $drawer = false;
-
-    public array $sortBy = ['column' => 'name', 'direction' => 'asc'];
-
-    public bool $addEditModal = false;
-
-    // Clear filters
-    public function clear(): void
-    {
-        $this->reset();
-        $this->success('Filters cleared.', position: 'toast-bottom');
-    }
-
-    // Delete action
-    public function delete($id): void
-    {
-        $this->warning("Will delete #$id", 'It is fake.', position: 'toast-bottom');
-    }
-
-    // Delete action
-    public function edit($id): void
-    {
-        $addEditModal = true;
-        $this->success("Will Edit #$id", 'It is fake.', position: 'toast-top');
-    }
-
-    public function print()
-    {
-        $this->dispatch('printTable');
-    }
+    public bool $viewModal = false;
+    public ?int $viewingId = null;
 
     // Table headers
     public function headers(): array
     {
         return [
-            ['key' => 'id', 'label' => '#', 'class' => 'w-1'],
-            ['key' => 'name', 'label' => 'Name', 'class' => 'w-64'],
-            ['key' => 'age', 'label' => 'Age', 'class' => 'w-20'],
-            ['key' => 'email', 'label' => 'E-mail', 'sortable' => false],
+            ['key' => 'id', 'label' => '#', 'sortable' => true],
+            ['key' => 'name', 'label' => 'Name', 'sortable' => true],
+            ['key' => 'email', 'label' => 'Email', 'sortable' => true],
+            ['key' => 'roles', 'label' => 'Roles', 'sortable' => false],
+            ['key' => 'status', 'label' => 'Status', 'sortable' => true],
+            ['key' => 'created_at', 'label' => 'Created At', 'sortable' => true],
         ];
     }
 
-    /**
-     * For demo purpose, this is a static collection.
-     *
-     * On real projects you do it with Eloquent collections.
-     * Please, refer to maryUI docs to see the eloquent examples.
-     */
-    public function users(): Collection
+    public function getUsersProperty()
     {
-        return collect([
-            ['id' => 1, 'name' => 'Mary', 'email' => 'mary@mary-ui.com', 'age' => 23],
-            ['id' => 2, 'name' => 'Giovanna', 'email' => 'giovanna@mary-ui.com', 'age' => 7],
-            ['id' => 3, 'name' => 'Marina', 'email' => 'marina@mary-ui.com', 'age' => 5],
-        ])
-            ->sortBy([[...array_values($this->sortBy)]])
-            ->when($this->search, function (Collection $collection) {
-                return $collection->filter(
-                    fn(array $item) => str($item['name'])->contains($this->search, true)
-                );
-            });
+        return User::with(['roles'])
+            ->when($this->search, function($query, $search) {
+                $query->where('name', 'like', "%{$search}%")
+                    ->orWhere('email', 'like', "%{$search}%");
+            })
+            ->orderBy($this->sort_by, $this->sort_dir)
+            ->paginate(10);
     }
 
     public function with(): array
     {
         return [
-            'users' => $this->users(),
+            'users' => $this->users,
             'headers' => $this->headers()
         ];
     }
@@ -86,59 +53,48 @@ new class extends Component {
     <!-- HEADER -->
     <x-header title="Users" separator progress-indicator>
         <x-slot:middle class="!justify-end">
-            <x-input placeholder="Search..." wire:model.live.debounce="search" clearable icon="o-magnifying-glass" />
+            <x-input placeholder="Search users..." wire:model.live.debounce="search" clearable icon="o-magnifying-glass" />
         </x-slot:middle>
-        <x-slot:actions>
-            <x-button label="Filters" @click="$wire.drawer = true" responsive icon="o-funnel" />
-            <x-button label="Print" wire:click="print" responsive icon="o-printer" />
-        </x-slot:actions>
     </x-header>
 
-    <!-- TABLE  -->
+    <!-- TABLE -->
     <x-card id="printable-table">
-        <x-table :headers="$headers" :rows="$users" :sort-by="$sortBy">
+        <x-table :headers="$headers" :rows="$users" sortable wire:loading.class="opacity-50">
+            @scope('cell_email', $user)
+                <div>
+                    <p>{{ $user->email }}</p>
+                    <p class="text-xs text-gray-500">{{ $user->phone ?? 'No phone' }}</p>
+                </div>
+            @endscope
+
+            @scope('cell_roles', $user)
+                <div class="flex flex-wrap gap-1">
+                    @foreach($user->roles as $role)
+                        <x-badge :value="$role->name" />
+                    @endforeach
+                </div>
+            @endscope
+
+            @scope('cell_status', $user)
+                <x-badge :value="$user->status" 
+                         :color="$user->status === 'active' ? 'success' : 'warning'" />
+            @endscope
+
             @scope('actions', $user)
-                <x-button icon="o-trash" wire:click="delete({{ $user['id'] }})" wire:confirm="Are you sure?" spinner class="btn-ghost btn-sm text-red-500" />
-                <x-button icon="o-pencil" wire:click="edit({{ $user['id'] }})" @click="$wire.addEditModal = true" spinner class="btn-ghost btn-sm text-red-500" />
+                <div class="flex gap-1">
+                    <x-button icon="o-eye" wire:click="view({{ $user->id }})" spinner class="btn-ghost btn-sm" title="View Details" />
+                    <x-button icon="o-pencil" wire:click="edit({{ $user->id }})" spinner class="btn-ghost btn-sm" title="Edit" />
+                    <x-button icon="o-trash" wire:click="delete({{ $user->id }})" 
+                        wire:confirm="Are you sure you want to delete this user?" 
+                        spinner class="btn-ghost btn-sm text-red-500" title="Delete" />
+                </div>
             @endscope
         </x-table>
+        
+        <div class="mt-4">
+            {{ $users->links() }}
+        </div>
     </x-card>
-
-    <!-- FILTER DRAWER -->
-    <x-drawer wire:model="drawer" title="Filters" right separator with-close-button class="lg:w-1/3">
-        <x-input placeholder="Search..." wire:model.live.debounce="search" icon="o-magnifying-glass" @keydown.enter="$wire.drawer = false" />
-
-        <x-slot:actions>
-            <x-button label="Reset" icon="o-x-mark" wire:click="clear" spinner />
-            <x-button label="Done" icon="o-check" class="btn-primary" @click="$wire.drawer = false" />
-        </x-slot:actions>
-    </x-drawer>
-
-    <x-modal wire:model="addEditModal" class="backdrop-blur">
-        <div class="mb-5">Press `ESC`, click outside or click `CANCEL` to close.</div>
-        <x-button label="Confirm" class="btn-primary" />
-        <x-button label="Cancel" @click="$wire.addEditModal = false" />
-    </x-modal>
-
-    <script>
-        document.addEventListener('livewire:initialized', () => {
-            @this.on('printTable', () => {
-                const printContents = document.getElementById('printable-table').innerHTML;
-                const originalContents = document.body.innerHTML;
-                
-                document.body.innerHTML = `
-                    <div class="print-container">
-                        <h1 class="text-center text-xl font-bold mb-4">Users List</h1>
-                        ${printContents}
-                    </div>
-                `;
-                
-                window.print();
-                document.body.innerHTML = originalContents;
-                @this.dispatch('livewire:initialized');
-            });
-        });
-    </script>
 </div>
 
 

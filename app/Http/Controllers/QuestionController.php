@@ -7,19 +7,28 @@ use App\Services\QuestionService;
 use App\Models\Question;
 use App\Models\Subject;
 use App\Models\QuestionType;
+use App\Support\ImportFields;
 use Illuminate\Http\Request;
 
 class QuestionController extends Controller
 {
     protected $questionService;
+    
+    /**
+     * The middleware definitions for this controller.
+     *
+     * @var array
+     */
+    protected $middleware = [
+        'permission:view-questions' => ['index', 'show', 'search', 'filter', 'downloadTemplate'],
+        'permission:create-questions' => ['create', 'store', 'createBulk', 'storeBulk', 'downloadTemplate'],
+        'permission:edit-questions' => ['edit', 'update'],
+        'permission:delete-questions' => ['destroy']
+    ];
 
     public function __construct(QuestionService $questionService)
     {
         $this->questionService = $questionService;
-        $this->middleware('permission:view-questions')->only(['index', 'show', 'search', 'filter']);
-        $this->middleware('permission:create-questions')->only(['create', 'store', 'createBulk', 'storeBulk']);
-        $this->middleware('permission:edit-questions')->only(['edit', 'update']);
-        $this->middleware('permission:delete-questions')->only('destroy');
     }
 
     /**
@@ -225,6 +234,64 @@ class QuestionController extends Controller
             return redirect()->back()
                 ->withInput()
                 ->with('error', 'Error creating bulk questions: ' . $e->getMessage());
+        }
+    }
+
+    public function downloadTemplate()
+    {
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="question_import_template.csv"',
+        ];
+
+        $columns = array_values(ImportFields::$questionFields);
+
+        $callback = function() use ($columns) {
+            $file = fopen('php://output', 'w');
+            fputcsv($file, $columns);
+            
+            // Add sample row
+            fputcsv($file, ImportFields::$sampleRow);
+            
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|file|mimes:csv,txt'
+        ]);
+
+        try {
+            $result = $this->questionService->importQuestions($request->file('file')->path());
+            
+            // Dump debug info to session for viewing in blade
+            session()->flash('import_debug', $result['debug'] ?? []);
+            
+            if (!$result['success']) {
+                return redirect()->back()
+                    ->with('error', $result['message'])
+                    ->with('import_errors', $result['errors']);
+            }
+            
+            if (!empty($result['errors'])) {
+                return redirect()->back()
+                    ->with('warning', $result['message'])
+                    ->with('import_errors', $result['errors']);
+            }
+
+            // Force a refresh of the model count
+            app()->make('db')->flushQueryLog();
+            
+            return redirect()->route('questions.index')
+                ->with('success', $result['message']);
+                
+        } catch (\Exception $e) {
+            return redirect()->back()
+                ->with('error', 'Error importing questions: ' . $e->getMessage());
         }
     }
 }
