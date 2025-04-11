@@ -11,32 +11,30 @@ function initializeMathField(element) {
         return;
     }
 
-    // Configure the MathField instance
-    element.setOptions({
-        virtualKeyboardMode: 'manual',
-        virtualKeyboards: 'all',
-        smartMode: true,
-        smartFence: true,
-        selectOnFocus: false,
-        readOnly: false
-    });
+    // Configure the MathField instance using properties
+    element.virtualKeyboardMode = 'manual';
+    element.virtualKeyboards = 'all';
+    element.smartMode = true;
+    element.smartFence = true;
+    element.selectOnFocus = false;
+    element.readOnly = false;
 
     // Handle focus events
     element.addEventListener('focus', () => {
-        element.setOptions({ readOnly: false });
+        element.readOnly = false;
     });
 
     // Handle blur events
     element.addEventListener('blur', () => {
         // Small delay to ensure content is saved before potentially becoming read-only
         setTimeout(() => {
-            element.setOptions({ readOnly: false });
+            element.readOnly = false;
         }, 100);
     });
 
     // Ensure the field remains editable after any mathfield-rendered event
     element.addEventListener('mathfield-rendered', () => {
-        element.setOptions({ readOnly: false });
+        element.readOnly = false;
     });
 }
 
