@@ -4,6 +4,7 @@ use App\Models\Question;
 use App\Models\Subject;
 use App\Models\QuestionType;
 use App\Services\QuestionService;
+use App\Services\ExportImportService;
 use App\Http\Requests\QuestionFormRequest;
 use Illuminate\Support\Collection;
 use Livewire\Volt\Component;
@@ -60,6 +61,7 @@ new class extends Component {
     public $status;
     public bool $isEditing = false;
     protected $tempFilters = [];
+    protected ExportImportService $exportImportService;
     
 
     protected $queryString = [];  // Remove all query string parameters
@@ -76,6 +78,7 @@ new class extends Component {
     public function mount() 
     {
         $this->questionService = app(QuestionService::class);
+        $this->exportImportService = app(ExportImportService::class);
         $this->cleanUrl();
     }
     
@@ -269,9 +272,61 @@ new class extends Component {
         }
     }
     
-    public function print()
+    public bool $printModal = false;
+    public string $printFormat = 'web';
+    public string $printScope = 'current';
+
+    public function print(): void
     {
-        $this->dispatch('printTable');
+        try {
+            $filters = [
+                'difficulty_level' => $this->difficulty_level,
+                'subject_id' => $this->subject_id,
+                'question_type_id' => $this->question_type_id,
+                'search' => $this->search,
+                'sort_by' => $this->sort_by,
+                'sort_dir' => $this->sort_dir,
+            ];
+
+            // Get data based on scope
+            $data = match($this->printScope) {
+                'selected' => Question::whereIn('id', $this->selectedQuestions)
+                    ->with(['subject:id,name', 'questionType:id,name'])
+                    ->get(),
+                'all' => Question::with(['subject:id,name', 'questionType:id,name'])
+                    ->when($filters['difficulty_level'], fn($q, $v) => $q->where('difficulty_level', $v))
+                    ->when($filters['subject_id'], fn($q, $v) => $q->where('subject_id', $v))
+                    ->when($filters['question_type_id'], fn($q, $v) => $q->where('question_type_id', $v))
+                    ->when($filters['search'], fn($q, $v) => $q->where('text', 'like', "%{$v}%"))
+                    ->orderBy($filters['sort_by'], $filters['sort_dir'])
+                    ->get(),
+                default => collect($this->questions->items()) // Convert current page to collection
+            };
+
+            $this->exportImportService = app(ExportImportService::class);
+            $result = $this->exportImportService->print(
+                $this->printFormat,
+                $this->printScope,
+                $data,
+                $this->headers(),
+                null,
+                [
+                    'title' => 'Questions List',
+                    'filters' => $filters,
+                ]
+            );
+
+            if ($this->printFormat === 'pdf') {
+                $this->printModal = false;
+                $this->success('Print job prepared! Opening PDF...', position: 'toast-bottom');
+                $this->dispatch('triggerDownload', ['url' => $result]);
+            } else {
+                // For web printing, dispatch the print event with the HTML content
+                $this->dispatch('printContent', ['html' => $result]);
+            }
+        } catch (\Exception $e) {
+            $this->error('Print failed: ' . $e->getMessage(), position: 'toast-bottom');
+        }
     }
     
     
@@ -677,7 +732,7 @@ new class extends Component {
             <x-button label="Filters" @click="$wire.drawer = true" responsive icon="o-funnel" />
             <x-button label="Export" @click="$wire.exportModal = true" responsive icon="o-arrow-down-tray" />
             <x-button label="Import" @click="$wire.importModal = true" responsive icon="o-arrow-up-tray" />
-            <x-button label="Print" wire:click="print" responsive icon="o-printer" />
+            <x-button label="Print" @click="$wire.printModal = true" responsive icon="o-printer" />
             <x-button label="{{ $bulkEditMode ? 'Exit Bulk Edit' : 'Bulk Edit' }}" wire:click="toggleBulkEditMode"
                     responsive icon="{{ $bulkEditMode ? 'o-x-mark' : 'o-check-circle' }}"
                     class="{{ $bulkEditMode ? 'btn-error' : 'btn-info' }}" />
@@ -893,6 +948,50 @@ new class extends Component {
         </x-slot:actions>
     </x-modal>
     
+    <!-- PRINT MODAL -->
+    <x-modal wire:model="printModal" title="Print Questions">
+        <div class="space-y-4">
+            <div>
+                <x-label for="printFormat" value="Print Format" />
+                <x-select wire:model="printFormat"
+                         :options="[
+                            ['id' => 'web', 'name' => 'Web Print (Browser)'],
+                            ['id' => 'pdf', 'name' => 'PDF Document']
+                         ]" />
+                <p class="text-sm text-gray-500 mt-1">
+                    Web Print: Opens browser print dialog<br>
+                    PDF: Generates a high-quality PDF document
+                </p>
+            </div>
+
+            <div>
+                <x-label for="printScope" value="What to Print" />
+                <x-select wire:model="printScope"
+                         :options="[
+                            ['id' => 'current', 'name' => 'Current Page'],
+                            ['id' => 'all', 'name' => 'All Questions' . ($search || $difficulty_level || $subject_id || $question_type_id ? ' (With Filters)' : '')],
+                            ['id' => 'selected', 'name' => 'Selected Questions (' . count($selectedQuestions) . ')']
+                         ]"
+                         :disabled="$printScope === 'selected' && empty($selectedQuestions)" />
+                
+                @if($printScope === 'selected' && empty($selectedQuestions))
+                    <p class="text-sm text-red-500 mt-1">
+                        Please select questions to print using bulk edit mode
+                    </p>
+                @endif
+            </div>
+        </div>
+
+        <x-slot:actions>
+            <x-button label="Cancel" @click="$wire.printModal = false" />
+            <x-button label="Print"
+                     wire:click="print"
+                     class="btn-primary"
+                     :disabled="$printScope === 'selected' && empty($selectedQuestions)"
+                     spinner />
+        </x-slot:actions>
+    </x-modal>
+
     <!-- IMPORT MODAL -->
     <x-modal wire:model="importModal" title="Import Questions">
         <form wire:submit.prevent="import">
@@ -1003,8 +1102,7 @@ new class extends Component {
                         </div>
                     </div>
                 @endif
-                
-                <!-- Papers using this question -->
+
                 @if($viewingQuestion->papers && $viewingQuestion->papers->count() > 0)
                     <div>
                         <h3 class="text-lg font-medium mb-1">Used in Papers</h3>
@@ -1028,7 +1126,6 @@ new class extends Component {
                 document.addEventListener('livewire:initialized', () => {
                     @this.on('viewModalToggled', (isOpen) => {
                         if (isOpen) {
-                            // Dispatch event when modal opens
                             @this.dispatch('modal-opened');
                         }
                     });
@@ -1037,22 +1134,36 @@ new class extends Component {
         @endif
     </x-modal>
 
-    <!-- Create and edit modals with a single modal -->
     <x-modal wire:model="questionModal" title="{{ isset($id) ? 'Edit Question' : 'Add New Question' }}">
-        
-        <!-- Add x-data to initialize Alpine component -->
+                
+<style>
+
+math-field { 
+  font-size: 28px; 
+  width: 100%;
+  position: relative;
+  z-index: 1;
+} 
+
+
+
+</style>
         <form wire:submit.prevent="saveQuestion" x-data="questionFormAlpine()">
             <div class="space-y-6">
             <span class="w-full text-sm text-gray-500 mb-0 grid grid-cols-[1fr_auto] ">
                 <label for="math_field" class="text-gray-500">Math Expression (MathType)</label>
-                <!-- Use Alpine @click -->
                 <a href="javascript:;" @click="insertLatex()" class="text-xs px-2 mb-1 text-red-600 inline-flex border border-pink-300 bg-pink-100 dark:border-pink-300/10 dark:bg-pink-400/10">Insert Expression to the Question</a> 
             </span>
-                <!-- Add x-ref -->
-                <math-field contenteditable="true" tabindex="2" id="math_field" x-ref="math_field" class="w-full border border-gray-200 rounded p-4 mb-2">
+                <math-field 
+                    contenteditable="true" 
+                    tabindex="1" 
+                    id="math_field" 
+                    x-ref="math_field" 
+                    class="w-full border border-gray-200 rounded p-4 mb-2"
+                    @click="$event.stopPropagation(); $refs.math_field.focus()"
+                >
                 </math-field>
                 <div class="mb-4">
-                    <!-- Add x-ref -->
                     <x-textarea 
                         x-ref="question_text" 
                         id="question_text" 
@@ -1066,11 +1177,9 @@ new class extends Component {
                         required>
                         {{ $text }}
                     </x-textarea>
-                    <!-- Add x-ref -->
                     <div x-ref="question_display" style="display: none;" class="bg-gray-100 p-3 mb-1 rounded border border-gray-300 min-h-[100px]"></div>
                     <div class="flex justify-end">
                     <span class="w-full text-xs text-gray-500 mb-1 ">Use LaTeX syntax for math expressions or use MathType. </span>
-                        <!-- Use Alpine @click and add x-ref -->
                         <x-button href="javascript:;" @click="toggleDisplay()" x-ref="toggleDisplayButton" label="Show Question Display" class="btn-warning btn-xs" />
                     </div>
                 </div>
@@ -1126,8 +1235,7 @@ new class extends Component {
                         />
                     </div>
                 </div>
-                
-                <!-- Only show options section for multiple choice questions -->
+
                 @if($this->shouldShowOptions())
                     <!-- Options Section -->
                     <div>
@@ -1171,12 +1279,42 @@ new class extends Component {
 </div>
 
 <script>
+
     function questionFormAlpine() {
         return {
             isShowingLaTeX: true,
+            
+
+            init() {
+                const mathField = this.$refs.math_field;
+                const hasPlaceholder = (str) => str.includes('\\placeholder');
+                
+                mathField.addEventListener('click', (event) => {
+                    mathField.focus();
+                    console.log
+                    mathField.setAttribute('contenteditable', 'true');
+                    if (hasPlaceholder(mathField.value)) {
+                        this.focusOnPlaceholder(mathField)
+                    }
+                });
+            },
+            
+            focusOnPlaceholder(mathField) {
+                const value = mathField.value;
+                const placeholderPos = value.indexOf('\\placeholder');
+                if (placeholderPos >= 0) {
+                    // console.log('Placeholder position:', placeholderPos);
+                    try {
+                        mathField.setPosition(placeholderPos);
+                    } catch (e) {
+                        console.warn('Could not set cursor position to placeholder');
+                    }
+                }
+            },
+
             insertLatex() {
                 const mathField = this.$refs.math_field;
-                const questionTextarea = this.$refs.question_text; // Use x-ref
+                const questionTextarea = this.$refs.question_text;
                 const hasPlaceholder = (str) => str.includes('\\placeholder');
 
                 if (!mathField.value) {
@@ -1187,11 +1325,15 @@ new class extends Component {
                     alert('Please replace the placeholder □ from the math expression.');
                     return;
                 }
+                
                 // Directly update the Livewire model for reactivity
                 const currentText = this.$wire.get('text') || '';
                 this.$wire.set('text', currentText + " \\( \\large " + mathField.value + " \\) ");
                 mathField.value = '';
-                questionTextarea.focus();
+                mathField.setAttribute('contenteditable', 'true');
+               // questionTextarea.focus();
+               
+               
             },
             toggleDisplay() {
                 this.isShowingLaTeX = !this.isShowingLaTeX;
@@ -1206,9 +1348,9 @@ new class extends Component {
                 } else {
                     questionTextarea.style.display = 'none';
                     questionDisplayDiv.style.display = 'block';
-                    // Get text directly from Livewire model for accuracy
+
                     questionDisplayDiv.textContent = this.$wire.get('text') || '';
-                    // Ensure KaTeX rendering function exists
+
                     if (window.renderMathInElement) {
                         window.renderMathInElement(questionDisplayDiv, {
                             delimiters: [
@@ -1229,11 +1371,8 @@ new class extends Component {
     }
 
     document.addEventListener('livewire:initialized', () => {
-        // Initialize Alpine data context if needed, though x-data on the element is preferred
-        // Alpine.data('questionForm', questionFormAlpine);
 
         @this.on('triggerDownload', (data) => {
-            // Ensure data and URL exist before proceeding
              if (!data || !data[0] || !data[0].url) {
                 console.error('No URL provided for download');
                 return;
@@ -1259,42 +1398,50 @@ new class extends Component {
                 });
         });
 
-        @this.on('printTable', () => {
-            // Find the element within a timeout to ensure DOM is fully loaded
-            setTimeout(() => {
-                const printableElement = document.getElementById('printable-table');
-                
-                if (!printableElement) {
-                    console.error('Cannot find element with ID "printable-table"');
-                    return;
-                }
-                
-                // Clone the content for printing to avoid modifying the original DOM
-                const clonedContent = printableElement.cloneNode(true);
-                
-                // Remove pagination elements from the clone
-                const paginationElements = clonedContent.querySelectorAll('.mary-table-pagination');
-                paginationElements.forEach(el => el.parentNode.removeChild(el));
-                
-                // Remove action columns from the clone
-                const actionColumns = clonedContent.querySelectorAll('[data-column="actions"], .actions-column');
-                actionColumns.forEach(col => col.parentNode.removeChild(col));
-                
-                const originalContents = document.body.innerHTML;
+        @this.on('printContent', (data) => {
+            if (!data || !data[0] || !data[0].html) {
+                console.error('No HTML content provided for printing');
+                return;
+            }
 
-                document.body.innerHTML = `
-                    <div class="print-container">
-                        <h1 class="text-center text-xl font-bold mb-4">Questions List</h1>
-                        ${clonedContent.innerHTML}
-                    </div>
-                `;
+            const originalContent = document.body.innerHTML;
 
-                window.print();
-                document.body.innerHTML = originalContents;
-                
-                // Re-initialize Livewire after content restoration
-                @this.dispatch('livewire:initialized');
-            }, 100); // Small delay to ensure DOM is ready
+            document.body.innerHTML = `
+                <style>
+                    @media print {
+                        @page { margin: 15mm; }
+                        body { margin: 0; }
+                        table { width: 100%; border-collapse: collapse; }
+                        th { background-color: #f5f5f5 !important; -webkit-print-color-adjust: exact; }
+                        th, td { 
+                            padding: 8px; 
+                            border: 1px solid #ddd; 
+                            text-align: left; 
+                            font-size: 12pt;
+                        }
+                        tr { page-break-inside: avoid; }
+                        .no-print, .actions-column, [data-column="actions"] { display: none !important; }
+                        h1 { text-align: center; font-size: 18pt; margin-bottom: 15px; }
+                        .badge {
+                            padding: 2px 8px;
+                            border-radius: 4px;
+                            font-size: 10pt;
+                        }
+                        .badge-success { background-color: #e6ffe6 !important; color: #006600 !important; }
+                        .badge-warning { background-color: #fff3e6 !important; color: #cc7700 !important; }
+                        .badge-error { background-color: #ffe6e6 !important; color: #cc0000 !important; }
+                    }
+                </style>
+                <div class="print-container">
+                    ${data[0].html}
+                </div>
+            `;
+
+            // Trigger print
+            window.print();
+
+            // Instead of replacing the entire body, reload the page
+            window.location.reload();
         });
 
         @this.on('showErrorLogDownload', () => {

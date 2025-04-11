@@ -1102,8 +1102,7 @@ new class extends Component {
                         </div>
                     </div>
                 @endif
-                
-                <!-- Papers using this question -->
+
                 @if($viewingQuestion->papers && $viewingQuestion->papers->count() > 0)
                     <div>
                         <h3 class="text-lg font-medium mb-1">Used in Papers</h3>
@@ -1127,7 +1126,6 @@ new class extends Component {
                 document.addEventListener('livewire:initialized', () => {
                     @this.on('viewModalToggled', (isOpen) => {
                         if (isOpen) {
-                            // Dispatch event when modal opens
                             @this.dispatch('modal-opened');
                         }
                     });
@@ -1136,22 +1134,36 @@ new class extends Component {
         @endif
     </x-modal>
 
-    <!-- Create and edit modals with a single modal -->
     <x-modal wire:model="questionModal" title="{{ isset($id) ? 'Edit Question' : 'Add New Question' }}">
-        
-        <!-- Add x-data to initialize Alpine component -->
+                
+<style>
+
+math-field { 
+  font-size: 28px; 
+  width: 100%;
+  position: relative;
+  z-index: 1;
+} 
+
+
+
+</style>
         <form wire:submit.prevent="saveQuestion" x-data="questionFormAlpine()">
             <div class="space-y-6">
             <span class="w-full text-sm text-gray-500 mb-0 grid grid-cols-[1fr_auto] ">
                 <label for="math_field" class="text-gray-500">Math Expression (MathType)</label>
-                <!-- Use Alpine @click -->
                 <a href="javascript:;" @click="insertLatex()" class="text-xs px-2 mb-1 text-red-600 inline-flex border border-pink-300 bg-pink-100 dark:border-pink-300/10 dark:bg-pink-400/10">Insert Expression to the Question</a> 
             </span>
-                <!-- Add x-ref -->
-                <math-field contenteditable="true" tabindex="2" id="math_field" x-ref="math_field" class="w-full border border-gray-200 rounded p-4 mb-2">
+                <math-field 
+                    contenteditable="true" 
+                    tabindex="1" 
+                    id="math_field" 
+                    x-ref="math_field" 
+                    class="w-full border border-gray-200 rounded p-4 mb-2"
+                    @click="$event.stopPropagation(); $refs.math_field.focus()"
+                >
                 </math-field>
                 <div class="mb-4">
-                    <!-- Add x-ref -->
                     <x-textarea 
                         x-ref="question_text" 
                         id="question_text" 
@@ -1165,11 +1177,9 @@ new class extends Component {
                         required>
                         {{ $text }}
                     </x-textarea>
-                    <!-- Add x-ref -->
                     <div x-ref="question_display" style="display: none;" class="bg-gray-100 p-3 mb-1 rounded border border-gray-300 min-h-[100px]"></div>
                     <div class="flex justify-end">
                     <span class="w-full text-xs text-gray-500 mb-1 ">Use LaTeX syntax for math expressions or use MathType. </span>
-                        <!-- Use Alpine @click and add x-ref -->
                         <x-button href="javascript:;" @click="toggleDisplay()" x-ref="toggleDisplayButton" label="Show Question Display" class="btn-warning btn-xs" />
                     </div>
                 </div>
@@ -1225,8 +1235,7 @@ new class extends Component {
                         />
                     </div>
                 </div>
-                
-                <!-- Only show options section for multiple choice questions -->
+
                 @if($this->shouldShowOptions())
                     <!-- Options Section -->
                     <div>
@@ -1270,12 +1279,39 @@ new class extends Component {
 </div>
 
 <script>
+
     function questionFormAlpine() {
         return {
             isShowingLaTeX: true,
+
+            init() {
+                const mathField = this.$refs.math_field;
+                const hasPlaceholder = (str) => str.includes('\\placeholder');
+                
+                mathField.addEventListener('click', (event) => {
+               
+                    if (hasPlaceholder(mathField.value)) {
+                        this.focusOnPlaceholder(mathField)
+                    }
+                });
+            },
+            
+            focusOnPlaceholder(mathField) {
+                const value = mathField.value;
+                const placeholderPos = value.indexOf('\\placeholder');
+                if (placeholderPos >= 0) {
+                    // console.log('Placeholder position:', placeholderPos);
+                    try {
+                        mathField.setPosition(placeholderPos);
+                    } catch (e) {
+                        console.warn('Could not set cursor position to placeholder');
+                    }
+                }
+            },
+
             insertLatex() {
                 const mathField = this.$refs.math_field;
-                const questionTextarea = this.$refs.question_text; // Use x-ref
+                const questionTextarea = this.$refs.question_text;
                 const hasPlaceholder = (str) => str.includes('\\placeholder');
 
                 if (!mathField.value) {
@@ -1286,11 +1322,13 @@ new class extends Component {
                     alert('Please replace the placeholder □ from the math expression.');
                     return;
                 }
+                
                 // Directly update the Livewire model for reactivity
                 const currentText = this.$wire.get('text') || '';
                 this.$wire.set('text', currentText + " \\( \\large " + mathField.value + " \\) ");
                 mathField.value = '';
-                questionTextarea.focus();
+                mathField.setAttribute('contenteditable', 'true');
+               // questionTextarea.focus();
             },
             toggleDisplay() {
                 this.isShowingLaTeX = !this.isShowingLaTeX;
@@ -1305,9 +1343,9 @@ new class extends Component {
                 } else {
                     questionTextarea.style.display = 'none';
                     questionDisplayDiv.style.display = 'block';
-                    // Get text directly from Livewire model for accuracy
+
                     questionDisplayDiv.textContent = this.$wire.get('text') || '';
-                    // Ensure KaTeX rendering function exists
+
                     if (window.renderMathInElement) {
                         window.renderMathInElement(questionDisplayDiv, {
                             delimiters: [
@@ -1328,11 +1366,8 @@ new class extends Component {
     }
 
     document.addEventListener('livewire:initialized', () => {
-        // Initialize Alpine data context if needed, though x-data on the element is preferred
-        // Alpine.data('questionForm', questionFormAlpine);
 
         @this.on('triggerDownload', (data) => {
-            // Ensure data and URL exist before proceeding
              if (!data || !data[0] || !data[0].url) {
                 console.error('No URL provided for download');
                 return;
@@ -1364,10 +1399,8 @@ new class extends Component {
                 return;
             }
 
-            // Store current document content
             const originalContent = document.body.innerHTML;
 
-            // Replace content with print content
             document.body.innerHTML = `
                 <style>
                     @media print {
