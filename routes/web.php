@@ -12,6 +12,18 @@ Volt::route('/settings', 'appearance')->name('settings');
 
 Volt::route('/question-types', 'question-types.index')->name('question-type.index');
 
+Route::prefix('questions')->group(function () {
+    Volt::route('/', 'questions.index')->name('questions.index');
+    Volt::route('/import', 'questions.import')->name('questions.import');
+    Volt::route('/{question}/edit', 'questions.edit')->name('questions.edit');
+    Volt::route('/{question}/show', 'questions.show')->name('questions.show');
+    Route::get('/download-template', [\App\Http\Controllers\QuestionController::class, 'downloadTemplate'])
+        ->name('questions.download-template');
+    Route::get('/download-error-log', [\App\Http\Controllers\QuestionController::class, 'downloadErrorLog'])
+        ->name('questions.download-error-log');
+});
+
+
 Route::middleware(['auth', 'verified'])->group(function () {
     // Dashboard
     Volt::route('/dashboard', 'dashboard.index')->name('dashboard');
@@ -22,16 +34,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     // Questions
-    Route::prefix('questions')->group(function () {
-        Volt::route('/', 'questions.index')->name('questions.index');
-        Volt::route('/import', 'questions.import')->name('questions.import');
-        Volt::route('/{question}/edit', 'questions.edit')->name('questions.edit');
-        Volt::route('/{question}/show', 'questions.show')->name('questions.show');
-        Route::get('/download-template', [\App\Http\Controllers\QuestionController::class, 'downloadTemplate'])
-            ->name('questions.download-template');
-        Route::get('/download-error-log', [\App\Http\Controllers\QuestionController::class, 'downloadErrorLog'])
-            ->name('questions.download-error-log');
-    });
+    // Route::prefix('questions')->group(function () {
+    //     Volt::route('/', 'questions.index')->name('questions.index');
+    //     Volt::route('/import', 'questions.import')->name('questions.import');
+    //     Volt::route('/{question}/edit', 'questions.edit')->name('questions.edit');
+    //     Volt::route('/{question}/show', 'questions.show')->name('questions.show');
+    //     Route::get('/download-template', [\App\Http\Controllers\QuestionController::class, 'downloadTemplate'])
+    //         ->name('questions.download-template');
+    //     Route::get('/download-error-log', [\App\Http\Controllers\QuestionController::class, 'downloadErrorLog'])
+    //         ->name('questions.download-error-log');
+    // });
 
     // Papers
     Route::prefix('papers')->group(function () {

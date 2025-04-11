@@ -12,6 +12,7 @@ class ExportImportService
 {
     protected $exportPath = 'exports';
     protected $importPath = 'imports';
+    protected $printPath = 'prints';  // Add a new path for print files
 
     public function export(
         string $format,
@@ -115,6 +116,67 @@ class ExportImportService
         Excel::store($export, "{$this->exportPath}/{$filename}", 'public');
 
         return Storage::disk('public')->url("{$this->exportPath}/{$filename}");
+    }
+
+    /**
+     * Generate a printable document
+     * 
+     * @param string $format The output format ('web', 'pdf')
+     * @param string $scope What to print ('current', 'all', 'selected')
+     * @param Collection $data The data to print
+     * @param array $headers Column headers
+     * @param string|null $viewPath Custom view path (optional)
+     * @param array $viewData Additional data for the view
+     * @param string|null $filename Custom filename (optional)
+     * @return string URL to the printable document or HTML string for web printing
+     */
+    public function print(
+        string $format,
+        string $scope,
+        Collection $data,
+        array $headers,
+        string $viewPath = null,
+        array $viewData = [],
+        string $filename = null
+    ): string {
+        $filename = $filename ?? 'print-' . time();
+        
+        // Set print title based on scope
+        $printTitle = match($scope) {
+            'current' => 'Current Page',
+            'selected' => 'Selected Questions',
+            'all' => 'All Questions',
+            default => 'Questions List'
+        };
+        
+        $viewData['printTitle'] = $viewData['title'] ?? $printTitle;
+        $viewData['isPrintable'] = true;
+        $viewData['scope'] = $scope;
+        
+        // Use appropriate method based on format
+        return match($format) {
+            'pdf' => $this->exportToPdf($data, $headers, $viewPath, $viewData, $filename),
+            'web' => $this->generatePrintableHtml($data, $headers, $viewPath, $viewData),
+            default => throw new \InvalidArgumentException("Unsupported print format: {$format}")
+        };
+    }
+
+
+    /**
+     * Generate HTML optimized for web printing
+     */
+    protected function generatePrintableHtml(Collection $data, array $headers, string $viewPath = null, array $viewData = []): string
+    {
+        // Use print-specific view or fall back to the export view
+        $view = $viewPath ?? 'exports.print-layout';
+        
+        return view($view, [
+            'data' => $data,
+            'headers' => $headers,
+            'title' => $viewData['printTitle'] ?? 'Print Data',
+            'isPrintable' => true,
+            'viewData' => $viewData
+        ])->render();
     }
 
     public function import($file, $columnMap, $rowValidator = null, $rowProcessor = null): array

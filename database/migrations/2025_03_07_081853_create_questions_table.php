@@ -22,7 +22,7 @@ return new class extends Migration
             $table->text('explanation')->nullable();
             $table->text('image')->nullable();
             $table->integer('marks')->default(1);
-            $table->enum('difficulty_level', ['easy', 'medium', 'hard'])->default('medium'); 
+            $table->enum('difficulty_level', ['easy', 'medium', 'hard', 'very_hard', 'expert'])->default('medium'); 
             $table->enum('status', ['active', 'inactive'])->default('active');
             $table->timestamps();
             $table->softDeletes();

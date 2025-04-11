@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('question_types', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('short_name');
             $table->text('description')->nullable();
             $table->timestamps();
             $table->softDeletes();

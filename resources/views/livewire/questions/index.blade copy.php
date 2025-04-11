@@ -4,7 +4,6 @@ use App\Models\Question;
 use App\Models\Subject;
 use App\Models\QuestionType;
 use App\Services\QuestionService;
-use App\Services\ExportImportService;
 use App\Http\Requests\QuestionFormRequest;
 use Illuminate\Support\Collection;
 use Livewire\Volt\Component;
@@ -61,7 +60,6 @@ new class extends Component {
     public $status;
     public bool $isEditing = false;
     protected $tempFilters = [];
-    protected ExportImportService $exportImportService;
     
 
     protected $queryString = [];  // Remove all query string parameters
@@ -78,7 +76,6 @@ new class extends Component {
     public function mount() 
     {
         $this->questionService = app(QuestionService::class);
-        $this->exportImportService = app(ExportImportService::class);
         $this->cleanUrl();
     }
     
@@ -272,61 +269,9 @@ new class extends Component {
         }
     }
     
-    public bool $printModal = false;
-    public string $printFormat = 'web';
-    public string $printScope = 'current';
-
-    public function print(): void
+    public function print()
     {
-        try {
-            $filters = [
-                'difficulty_level' => $this->difficulty_level,
-                'subject_id' => $this->subject_id,
-                'question_type_id' => $this->question_type_id,
-                'search' => $this->search,
-                'sort_by' => $this->sort_by,
-                'sort_dir' => $this->sort_dir,
-            ];
-
-            // Get data based on scope
-            $data = match($this->printScope) {
-                'selected' => Question::whereIn('id', $this->selectedQuestions)
-                    ->with(['subject:id,name', 'questionType:id,name'])
-                    ->get(),
-                'all' => Question::with(['subject:id,name', 'questionType:id,name'])
-                    ->when($filters['difficulty_level'], fn($q, $v) => $q->where('difficulty_level', $v))
-                    ->when($filters['subject_id'], fn($q, $v) => $q->where('subject_id', $v))
-                    ->when($filters['question_type_id'], fn($q, $v) => $q->where('question_type_id', $v))
-                    ->when($filters['search'], fn($q, $v) => $q->where('text', 'like', "%{$v}%"))
-                    ->orderBy($filters['sort_by'], $filters['sort_dir'])
-                    ->get(),
-                default => collect($this->questions->items()) // Convert current page to collection
-            };
-
-            $this->exportImportService = app(ExportImportService::class);
-            $result = $this->exportImportService->print(
-                $this->printFormat,
-                $this->printScope,
-                $data,
-                $this->headers(),
-                null,
-                [
-                    'title' => 'Questions List',
-                    'filters' => $filters,
-                ]
-            );
-
-            if ($this->printFormat === 'pdf') {
-                $this->printModal = false;
-                $this->success('Print job prepared! Opening PDF...', position: 'toast-bottom');
-                $this->dispatch('triggerDownload', ['url' => $result]);
-            } else {
-                // For web printing, dispatch the print event with the HTML content
-                $this->dispatch('printContent', ['html' => $result]);
-            }
-        } catch (\Exception $e) {
-            $this->error('Print failed: ' . $e->getMessage(), position: 'toast-bottom');
-        }
+        $this->dispatch('printTable');
     }
     
     
@@ -732,7 +677,7 @@ new class extends Component {
             <x-button label="Filters" @click="$wire.drawer = true" responsive icon="o-funnel" />
             <x-button label="Export" @click="$wire.exportModal = true" responsive icon="o-arrow-down-tray" />
             <x-button label="Import" @click="$wire.importModal = true" responsive icon="o-arrow-up-tray" />
-            <x-button label="Print" @click="$wire.printModal = true" responsive icon="o-printer" />
+            <x-button label="Print" wire:click="print" responsive icon="o-printer" />
             <x-button label="{{ $bulkEditMode ? 'Exit Bulk Edit' : 'Bulk Edit' }}" wire:click="toggleBulkEditMode"
                     responsive icon="{{ $bulkEditMode ? 'o-x-mark' : 'o-check-circle' }}"
                     class="{{ $bulkEditMode ? 'btn-error' : 'btn-info' }}" />
@@ -948,50 +893,6 @@ new class extends Component {
         </x-slot:actions>
     </x-modal>
     
-    <!-- PRINT MODAL -->
-    <x-modal wire:model="printModal" title="Print Questions">
-        <div class="space-y-4">
-            <div>
-                <x-label for="printFormat" value="Print Format" />
-                <x-select wire:model="printFormat"
-                         :options="[
-                            ['id' => 'web', 'name' => 'Web Print (Browser)'],
-                            ['id' => 'pdf', 'name' => 'PDF Document']
-                         ]" />
-                <p class="text-sm text-gray-500 mt-1">
-                    Web Print: Opens browser print dialog<br>
-                    PDF: Generates a high-quality PDF document
-                </p>
-            </div>
-
-            <div>
-                <x-label for="printScope" value="What to Print" />
-                <x-select wire:model="printScope"
-                         :options="[
-                            ['id' => 'current', 'name' => 'Current Page'],
-                            ['id' => 'all', 'name' => 'All Questions' . ($search || $difficulty_level || $subject_id || $question_type_id ? ' (With Filters)' : '')],
-                            ['id' => 'selected', 'name' => 'Selected Questions (' . count($selectedQuestions) . ')']
-                         ]"
-                         :disabled="$printScope === 'selected' && empty($selectedQuestions)" />
-                
-                @if($printScope === 'selected' && empty($selectedQuestions))
-                    <p class="text-sm text-red-500 mt-1">
-                        Please select questions to print using bulk edit mode
-                    </p>
-                @endif
-            </div>
-        </div>
-
-        <x-slot:actions>
-            <x-button label="Cancel" @click="$wire.printModal = false" />
-            <x-button label="Print"
-                     wire:click="print"
-                     class="btn-primary"
-                     :disabled="$printScope === 'selected' && empty($selectedQuestions)"
-                     spinner />
-        </x-slot:actions>
-    </x-modal>
-
     <!-- IMPORT MODAL -->
     <x-modal wire:model="importModal" title="Import Questions">
         <form wire:submit.prevent="import">
@@ -1358,52 +1259,42 @@ new class extends Component {
                 });
         });
 
-        @this.on('printContent', (data) => {
-            if (!data || !data[0] || !data[0].html) {
-                console.error('No HTML content provided for printing');
-                return;
-            }
+        @this.on('printTable', () => {
+            // Find the element within a timeout to ensure DOM is fully loaded
+            setTimeout(() => {
+                const printableElement = document.getElementById('printable-table');
+                
+                if (!printableElement) {
+                    console.error('Cannot find element with ID "printable-table"');
+                    return;
+                }
+                
+                // Clone the content for printing to avoid modifying the original DOM
+                const clonedContent = printableElement.cloneNode(true);
+                
+                // Remove pagination elements from the clone
+                const paginationElements = clonedContent.querySelectorAll('.mary-table-pagination');
+                paginationElements.forEach(el => el.parentNode.removeChild(el));
+                
+                // Remove action columns from the clone
+                const actionColumns = clonedContent.querySelectorAll('[data-column="actions"], .actions-column');
+                actionColumns.forEach(col => col.parentNode.removeChild(col));
+                
+                const originalContents = document.body.innerHTML;
 
-            // Store current document content
-            const originalContent = document.body.innerHTML;
+                document.body.innerHTML = `
+                    <div class="print-container">
+                        <h1 class="text-center text-xl font-bold mb-4">Questions List</h1>
+                        ${clonedContent.innerHTML}
+                    </div>
+                `;
 
-            // Replace content with print content
-            document.body.innerHTML = `
-                <style>
-                    @media print {
-                        @page { margin: 15mm; }
-                        body { margin: 0; }
-                        table { width: 100%; border-collapse: collapse; }
-                        th { background-color: #f5f5f5 !important; -webkit-print-color-adjust: exact; }
-                        th, td { 
-                            padding: 8px; 
-                            border: 1px solid #ddd; 
-                            text-align: left; 
-                            font-size: 12pt;
-                        }
-                        tr { page-break-inside: avoid; }
-                        .no-print, .actions-column, [data-column="actions"] { display: none !important; }
-                        h1 { text-align: center; font-size: 18pt; margin-bottom: 15px; }
-                        .badge {
-                            padding: 2px 8px;
-                            border-radius: 4px;
-                            font-size: 10pt;
-                        }
-                        .badge-success { background-color: #e6ffe6 !important; color: #006600 !important; }
-                        .badge-warning { background-color: #fff3e6 !important; color: #cc7700 !important; }
-                        .badge-error { background-color: #ffe6e6 !important; color: #cc0000 !important; }
-                    }
-                </style>
-                <div class="print-container">
-                    ${data[0].html}
-                </div>
-            `;
-
-            // Trigger print
-            window.print();
-
-            // Instead of replacing the entire body, reload the page
-            window.location.reload();
+                window.print();
+                document.body.innerHTML = originalContents;
+                
+                // Re-initialize Livewire after content restoration
+                @this.dispatch('livewire:initialized');
+            }, 100); // Small delay to ensure DOM is ready
         });
 
         @this.on('showErrorLogDownload', () => {

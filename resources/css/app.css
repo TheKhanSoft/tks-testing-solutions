@@ -2,9 +2,24 @@
 @source "../../vendor/robsontenorio/mary/src/View/Components/**/*.php";
 
 @plugin "daisyui" {
-    themes: garden  --default, dark --prefersdark, cupcake, lemonade, winter, nord, light, valentine;
+    themes: garden  --default, dark --prefersdark, cupcake, lemonade, winter, nord, light, valentine, garden;
+    root: ":root";
+    /* include: ;
+    exclude: ;
+    prefix: ; */
+    logs: true;
 }
+@custom-variant dark (&:where(.dark, .dark *));
+
 @import 'tailwindcss';
 @import '../../vendor/livewire/flux/dist/flux.css';
 
+
 @source "../views";
+@source "../../vendor/robsontenorio/mary/src/View/Components*.php"; 
+@source "../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php"; 
+@source "../../storage/framework/views/*.php"; 
+@source "../**/*.blade.php"; 
+@source "../**/*.js"; 
+@source "../**/*.vue";
+

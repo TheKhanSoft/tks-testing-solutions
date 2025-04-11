@@ -400,42 +400,6 @@ class QuestionService extends BaseService
     }
 
     /**
-     * Bulk update question difficulty
-     *
-     * @param array $questionIds
-     * @param string $difficulty
-     * @return void
-     */
-    public function bulkUpdateDifficulty(array $questionIds, string $difficulty): void
-    {
-        Question::whereIn('id', $questionIds)->update(['difficulty_level' => $difficulty]);
-    }
-
-    /**
-     * Bulk update question subject
-     *
-     * @param array $questionIds
-     * @param int $subjectId
-     * @return void
-     */
-    public function bulkUpdateSubject(array $questionIds, int $subjectId): void
-    {
-        Question::whereIn('id', $questionIds)->update(['subject_id' => $subjectId]);
-    }
-
-    /**
-     * Bulk update question type
-     *
-     * @param array $questionIds
-     * @param int $typeId
-     * @return void
-     */
-    public function bulkUpdateQuestionType(array $questionIds, int $typeId): void
-    {
-        Question::whereIn('id', $questionIds)->update(['question_type_id' => $typeId]);
-    }
-
-    /**
      * Bulk delete questions
      *
      * @param array $questionIds
@@ -447,6 +411,24 @@ class QuestionService extends BaseService
         foreach ($questions as $question) {
             $this->deleteQuestion($question);
         }
+    }
+
+    public function bulkUpdateDifficulty(array $questionIds, string $difficulty): void
+    {
+        Question::whereIn('id', $questionIds)
+            ->update(['difficulty_level' => $difficulty]);
+    }
+
+    public function bulkUpdateSubject(array $questionIds, int $subjectId): void
+    {
+        Question::whereIn('id', $questionIds)
+            ->update(['subject_id' => $subjectId]);
+    }
+
+    public function bulkUpdateQuestionType(array $questionIds, int $typeId): void
+    {
+        Question::whereIn('id', $questionIds)
+            ->update(['question_type_id' => $typeId]);
     }
 
     /**
@@ -567,7 +549,7 @@ class QuestionService extends BaseService
                                     }
                                     return [
                                         'text' => $parts[0],
-                                        'is_correct' => (bool)$parts[1],
+                                        'is_correct' => (bool)$parts[1] === true || $parts[1] === 'true' ? 1 : 0,
                                         'order' => (int)$parts[2]
                                     ];
                                 }, explode('||', $data['options']));
