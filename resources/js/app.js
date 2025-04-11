@@ -11,13 +11,22 @@ import './math-field';
 
 // Initialize math rendering after everything is loaded
 document.addEventListener('DOMContentLoaded', () => {
-    // Ensure all libraries are loaded before initializing
-    setTimeout(() => {
-        if (window.renderMath) {
-            window.renderMath();
-        }
-       
-    }, 100); 
+    // Initialize math rendering
+    if (window.renderMath) {
+        window.renderMath();
+    }
+    
+    // Initialize math fields
+    if (window.initializeAllMathFields) {
+        window.initializeAllMathFields();
+    }
+});
+
+// Re-initialize math fields after Livewire updates
+document.addEventListener('livewire:navigated', () => {
+    if (window.initializeAllMathFields) {
+        window.initializeAllMathFields();
+    }
 });
 function setupPrintHandler() {
     // Store original print function
