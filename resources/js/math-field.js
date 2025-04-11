@@ -11,31 +11,77 @@ function initializeMathField(element) {
         return;
     }
 
-    // Configure the MathField instance using properties
-    element.virtualKeyboardMode = 'manual';
-    element.virtualKeyboards = 'all';
-    element.smartMode = true;
-    element.smartFence = true;
-    element.selectOnFocus = false;
-    element.readOnly = false;
+    // Core configuration
+    const config = {
+        defaultMode: 'math',
+        inlineShortcuts: {
+            ...MathfieldElement.defaultInlineShortcuts,
+        },
+        keybindings: {
+            ...MathfieldElement.defaultKeybindings,
+        },
+        smartMode: true,
+        smartFence: true,
+        removeExtraneousParentheses: true,
+        letterShapeStyle: 'tex',
+        iron: false, // Allows editing
+        virtualKeyboardMode: 'manual',
+        virtualKeyboards: 'all',
+        customVirtualKeyboardLayers: {},
+        customVirtualKeyboards: {},
+        mathVirtualKeyboard: true,
+        mathModeSpace: '0',
+    };
 
-    // Handle focus events
-    element.addEventListener('focus', () => {
-        element.readOnly = false;
+    // Apply core configuration
+    Object.entries(config).forEach(([key, value]) => {
+        try {
+            element[key] = value;
+        } catch (e) {
+            console.warn(`Failed to set ${key}:`, e);
+        }
     });
 
-    // Handle blur events
-    element.addEventListener('blur', () => {
-        // Small delay to ensure content is saved before potentially becoming read-only
-        setTimeout(() => {
-            element.readOnly = false;
-        }, 100);
+    // Additional settings
+    element.style.minHeight = '50px';
+    element.style.maxHeight = '200px';
+    element.style.overflowY = 'auto';
+
+    // Event handlers
+    const handlers = {
+        focus: () => {
+            element.executeCommand(['switchMode', 'math']);
+            element.select();
+        },
+        blur: () => {
+            if (element.isConnected) {
+                element.executeCommand(['complete']);
+            }
+        },
+        change: () => {
+            if (element.isConnected) {
+                element.executeCommand(['complete']);
+            }
+        },
+        'math-error': (err) => {
+            console.warn('Math error:', err);
+        }
+    };
+
+    // Attach event handlers
+    Object.entries(handlers).forEach(([event, handler]) => {
+        element.addEventListener(event, handler);
     });
 
-    // Ensure the field remains editable after any mathfield-rendered event
-    element.addEventListener('mathfield-rendered', () => {
-        element.readOnly = false;
-    });
+    // Initial focus
+    setTimeout(() => {
+        element.executeCommand(['switchMode', 'math']);
+        try {
+            element.focus();
+        } catch (e) {
+            console.warn('Could not focus math field:', e);
+        }
+    }, 100);
 }
 
 // Function to initialize all math fields on the page

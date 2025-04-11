@@ -1155,12 +1155,14 @@ math-field {
                 <a href="javascript:;" @click="insertLatex()" class="text-xs px-2 mb-1 text-red-600 inline-flex border border-pink-300 bg-pink-100 dark:border-pink-300/10 dark:bg-pink-400/10">Insert Expression to the Question</a> 
             </span>
                 <math-field 
-                    contenteditable="true" 
-                    tabindex="1" 
                     id="math_field" 
-                    x-ref="math_field" 
-                    class="w-full border border-gray-200 rounded p-4 mb-2"
-                    @click="$event.stopPropagation(); $refs.math_field.focus()"
+                    x-ref="math_field"
+                    x-effect="initMathField"
+                    x-model.immediate="mathfieldValue"
+                    class="w-full border border-gray-200 rounded p-4 mb-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    @focus="$el.executeCommand(['complete'])"
+                    @change="$el.executeCommand(['complete'])"
+                    @click="$event.stopPropagation()"
                 >
                 </math-field>
                 <div class="mb-4">
@@ -1283,52 +1285,93 @@ math-field {
     function questionFormAlpine() {
         return {
             isShowingLaTeX: true,
+            mathField: null,
+
+            mathfieldValue: '',
 
             init() {
-                const mathField = this.$refs.math_field;
-                const hasPlaceholder = (str) => str.includes('\\placeholder');
-                
-                mathField.addEventListener('click', (event) => {
-               
-                    if (hasPlaceholder(mathField.value)) {
-                        this.focusOnPlaceholder(mathField)
+                this.$nextTick(() => {
+                    this.initMathField();
+                });
+
+                // Watch for modal state
+                this.$watch('$wire.questionModal', (isOpen) => {
+                    if (isOpen) {
+                        this.$nextTick(() => {
+                            this.initMathField();
+                            this.mathField?.focus();
+                        });
+                    } else {
+                        // Clear math field when modal closes
+                        this.mathfieldValue = '';
+                    }
+                });
+
+                // Watch for changes to mathfieldValue
+                this.$watch('mathfieldValue', (value) => {
+                    if (this.mathField) {
+                        this.mathField.value = value;
                     }
                 });
             },
-            
-            focusOnPlaceholder(mathField) {
-                const value = mathField.value;
-                const placeholderPos = value.indexOf('\\placeholder');
-                if (placeholderPos >= 0) {
-                    // console.log('Placeholder position:', placeholderPos);
-                    try {
-                        mathField.setPosition(placeholderPos);
-                    } catch (e) {
-                        console.warn('Could not set cursor position to placeholder');
+
+            initMathField() {
+                this.mathField = this.$refs.math_field;
+                if (!this.mathField) return;
+
+                if (window.initializeMathField) {
+                    window.initializeMathField(this.mathField);
+                }
+
+                // Attach direct event listeners
+                this.mathField.addEventListener('input', () => {
+                    if (this.mathField.value !== this.mathfieldValue) {
+                        this.mathfieldValue = this.mathField.value;
                     }
+                });
+
+                this.mathField.addEventListener('focus', () => {
+                    this.mathField.executeCommand(['switchMode', 'math']);
+                });
+
+                // Set initial value if exists
+                if (this.mathfieldValue) {
+                    this.mathField.value = this.mathfieldValue;
                 }
             },
 
             insertLatex() {
-                const mathField = this.$refs.math_field;
-                const questionTextarea = this.$refs.question_text;
-                const hasPlaceholder = (str) => str.includes('\\placeholder');
-
-                if (!mathField.value) {
+                if (!this.mathField) return;
+                
+                const value = this.mathfieldValue?.trim();
+                if (!value) {
                     alert('Please enter a math expression.');
                     return;
                 }
-                if (hasPlaceholder(mathField.value)) {
-                    alert('Please replace the placeholder □ from the math expression.');
+
+                // Clean up any incomplete commands
+                this.mathField.executeCommand(['complete']);
+                
+                // Get the final LaTeX
+                const latex = this.mathField.getValue('latex')?.trim();
+                if (!latex) {
+                    alert('Invalid math expression.');
                     return;
                 }
-                
-                // Directly update the Livewire model for reactivity
+
+                // Update the Livewire model with proper spacing
                 const currentText = this.$wire.get('text') || '';
-                this.$wire.set('text', currentText + " \\( \\large " + mathField.value + " \\) ");
-                mathField.value = '';
-                mathField.setAttribute('contenteditable', 'true');
-               // questionTextarea.focus();
+                const insertion = currentText.endsWith(' ') ? '' : ' ';
+                this.$wire.set('text', currentText + insertion + "\\( \\large " + latex + " \\)" + ' ');
+
+                // Reset math field
+                this.mathfieldValue = '';
+                this.$nextTick(() => {
+                    if (this.mathField) {
+                        this.mathField.executeCommand(['switchMode', 'math']);
+                        this.mathField.focus();
+                    }
+                });
             },
             toggleDisplay() {
                 this.isShowingLaTeX = !this.isShowingLaTeX;
